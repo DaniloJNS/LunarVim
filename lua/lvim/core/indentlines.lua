@@ -6,7 +6,7 @@ M.config = function()
     on_config_done = nil,
     options = {
       enabled = true,
-      buftype_exclude = { "terminal", "nofile" },
+      buftype_exclude = { "terminal", "nofile", "help", "alpha", "dashboard", "neo-tree", "Trouble", "lazy" },
       filetype_exclude = {
         "help",
         "startify",
@@ -21,14 +21,14 @@ M.config = function()
       context_char = lvim.icons.ui.LineLeft,
       show_trailing_blankline_indent = false,
       show_first_indent_level = true,
-      use_treesitter = true,
+      use_treesitter = false,
       show_current_context = true,
     },
   }
 end
 
 M.setup = function()
-  local status_ok, indent_blankline = pcall(require, "indent_blankline")
+  local status_ok, indent_blankline = pcall(reload, "indent_blankline")
   if not status_ok then
     return
   end

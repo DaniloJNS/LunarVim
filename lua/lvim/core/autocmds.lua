@@ -109,6 +109,7 @@ function M.load_defaults()
           local cursorline_hl = vim.api.nvim_get_hl_by_name("CursorLine", true)
           local normal_hl = vim.api.nvim_get_hl_by_name("Normal", true)
           vim.api.nvim_set_hl(0, "CmpItemKindCopilot", { fg = "#6CC644" })
+          vim.api.nvim_set_hl(0, "CmpItemKindOrgMode", { fg = "#6CC644" })
           vim.api.nvim_set_hl(0, "CmpItemKindTabnine", { fg = "#CA42F0" })
           vim.api.nvim_set_hl(0, "CmpItemKindCrate", { fg = "#F64D00" })
           vim.api.nvim_set_hl(0, "CmpItemKindEmoji", { fg = "#FDE030" })
@@ -123,13 +124,13 @@ function M.load_defaults()
       "BufEnter",
       {
         group = "_dir_opened",
-        nested = true,
+        once = true,
         callback = function(args)
           local bufname = vim.api.nvim_buf_get_name(args.buf)
           if require("lvim.utils").is_directory(bufname) then
             vim.api.nvim_del_augroup_by_name "_dir_opened"
             vim.cmd "do User DirOpened"
-            vim.api.nvim_exec_autocmds(args.event, { buffer = args.buf, data = args.data })
+            vim.api.nvim_exec_autocmds("BufEnter", {})
           end
         end,
       },
@@ -138,17 +139,37 @@ function M.load_defaults()
       { "BufRead", "BufWinEnter", "BufNewFile" },
       {
         group = "_file_opened",
-        nested = true,
+        once = true,
         callback = function(args)
           local buftype = vim.api.nvim_get_option_value("buftype", { buf = args.buf })
           if not (vim.fn.expand "%" == "" or buftype == "nofile") then
-            vim.api.nvim_del_augroup_by_name "_file_opened"
-            vim.api.nvim_exec_autocmds("User", { pattern = "FileOpened" })
+            vim.cmd "do User FileOpened"
             require("lvim.lsp").setup()
           end
         end,
       },
     },
+    {
+      "FileType",
+      {
+        pattern = { "ruby" },
+        group = "_filetype_settings",
+        callback = function()
+          vim.opt_local.textwidth = 120
+          vim.opt_local.colorcolumn = { 120 }
+        end,
+      }
+    },
+    {
+      "BufWritePre",
+      {
+        pattern = { "*.go" },
+        group = "_filetype_settings",
+        callback = function()
+          vim.lsp.buf.code_action({ context = { only = { 'source.organizeImports' } }, apply = true })
+        end
+      }
+    }
   }
 
   M.define_autocmds(definitions)
@@ -196,13 +217,16 @@ function M.configure_format_on_save()
 end
 
 function M.toggle_format_on_save()
+  local Util = require("lazy.core.util")
   local exists, autocmds = pcall(vim.api.nvim_get_autocmds, {
     group = "lsp_format_on_save",
     event = "BufWritePre",
   })
   if not exists or #autocmds == 0 then
+    Util.info("Enabled format on save")
     M.enable_format_on_save()
   else
+    Util.warn("Disabled format on save")
     M.disable_format_on_save()
   end
 end

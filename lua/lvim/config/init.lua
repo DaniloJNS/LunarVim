@@ -75,7 +75,9 @@ function M:load(config_path)
 
   vim.g.mapleader = (lvim.leader == "space" and " ") or lvim.leader
 
-  reload("lvim.keymappings").load(lvim.keys)
+  -- TODO: see how it work
+  -- reload("lvim.keymappings").load(lvim.keys)
+  reload("lvim.keymappings").load_defaults() -- for load mappins for plugins
 
   if lvim.transparent_window then
     autocmds.enable_transparent_mode()

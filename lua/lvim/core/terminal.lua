@@ -1,13 +1,32 @@
 local M = {}
 local Log = require "lvim.core.log"
 
+function _G.set_terminal_keymaps()
+  local op = { noremap = true }
+  vim.api.nvim_buf_set_keymap(0, "t", "<esc>", [[<C-\><C-n>]], op)
+  vim.api.nvim_buf_set_keymap(0, "t", "jk", [[<C-\><C-n>]], op)
+  vim.api.nvim_buf_set_keymap(0, "t", "<C-h>", [[<C-\><C-n><C-W>h]], op)
+  vim.api.nvim_buf_set_keymap(0, "t", "<C-j>", [[<C-\><C-n><C-W>j]], op)
+  vim.api.nvim_buf_set_keymap(0, "t", "<C-k>", [[<C-\><C-n><C-W>k]], op)
+  vim.api.nvim_buf_set_keymap(0, "t", "<C-l>", [[<C-\><C-n><C-W>l]], op)
+end
+
+-- if you only want these mappings for toggle term use term://*toggleterm#* instead
+vim.cmd("autocmd! TermOpen term://* lua set_terminal_keymaps()")
+
 M.config = function()
   lvim.builtin["terminal"] = {
     active = true,
     on_config_done = nil,
     -- size can be a number or function which is passed the current terminal
-    size = 20,
-    open_mapping = [[<c-\>]],
+    size = function(term)
+      if term.direction == "horizontal" then
+        return 15
+      elseif term.direction == "vertical" then
+        return vim.o.columns * 0.4
+      end
+    end,
+    open_mapping = [[<c-d>]],
     hide_numbers = true, -- hide the number column in toggleterm buffers
     shade_filetypes = {},
     shade_terminals = true,
@@ -18,7 +37,6 @@ M.config = function()
     -- direction = 'vertical' | 'horizontal' | 'window' | 'float',
     direction = "float",
     close_on_exit = true, -- close the terminal window when the process exits
-    auto_scroll = true, -- automatically scroll to the bottom on terminal output
     shell = nil, -- change the default shell
     -- This field is only relevant if direction is set to 'float'
     float_opts = {
@@ -35,9 +53,6 @@ M.config = function()
         border = "Normal",
         background = "Normal",
       },
-    },
-    winbar = {
-      enabled = false,
     },
     -- Add executables on the config.lua
     -- { cmd, keymap, description, direction, size }
@@ -160,7 +175,6 @@ M.lazygit_toggle = function()
       border = "none",
       width = 100000,
       height = 100000,
-      zindex = 200,
     },
     on_open = function(_)
       vim.cmd "startinsert!"

@@ -8,7 +8,7 @@ M.config = function()
       -- providers: provider used to get references in the buffer, ordered by priority
       providers = {
         "lsp",
-        "treesitter",
+        -- "treesitter",
         "regex",
       },
       -- delay: delay in milliseconds
@@ -54,7 +54,7 @@ M.config = function()
 end
 
 M.setup = function()
-  local status_ok, illuminate = pcall(require, "illuminate")
+  local status_ok, illuminate = pcall(reload, "illuminate")
   if not status_ok then
     return
   end

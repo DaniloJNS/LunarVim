@@ -52,7 +52,7 @@ end
 -- manually start the server and don't wait for the usual filetype trigger from lspconfig
 local function buf_try_add(server_name, bufnr)
   bufnr = bufnr or vim.api.nvim_get_current_buf()
-  require("lspconfig")[server_name].manager:try_add_wrapper(bufnr)
+  require("lspconfig")[server_name].manager.try_add_wrapper(bufnr)
 end
 
 -- check if the manager autocomd has already been configured since some servers can take a while to initialize
@@ -73,10 +73,10 @@ end
 local function launch_server(server_name, config)
   pcall(function()
     local command = config.cmd
-      or (function()
-        local default_config = require("lspconfig.server_configurations." .. server_name).default_config
-        return default_config.cmd
-      end)()
+        or (function()
+          local default_config = require("lspconfig.server_configurations." .. server_name).default_config
+          return default_config.cmd
+        end)()
     -- some servers have dynamic commands defined with on_new_config
     if type(command) == "table" and type(command[1]) == "string" and vim.fn.executable(command[1]) ~= 1 then
       Log:debug(string.format("[%q] is either not installed, missing from PATH, or not executable.", server_name))
@@ -111,7 +111,7 @@ function M.setup(server_name, user_config)
   local should_auto_install = function(name)
     local installer_settings = lvim.lsp.installer.setup
     return installer_settings.automatic_installation
-      and not vim.tbl_contains(installer_settings.automatic_installation.exclude, name)
+        and not vim.tbl_contains(installer_settings.automatic_installation.exclude, name)
   end
 
   if not registry.is_installed(pkg_name) then

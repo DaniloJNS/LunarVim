@@ -76,11 +76,11 @@ M.config = function()
         icon = lvim.icons.ui.BoldLineLeft, -- this should be omitted if indicator style is not 'icon'
         style = "icon", -- can also be 'underline'|'none',
       },
-      buffer_close_icon = lvim.icons.ui.Close,
-      modified_icon = lvim.icons.ui.Circle,
-      close_icon = lvim.icons.ui.BoldClose,
-      left_trunc_marker = lvim.icons.ui.ArrowCircleLeft,
-      right_trunc_marker = lvim.icons.ui.ArrowCircleRight,
+      -- buffer_close_icon = lvim.icons.ui.Close,
+      -- modified_icon = lvim.icons.ui.Circle,
+      -- close_icon = lvim.icons.ui.BoldClose,
+      -- left_trunc_marker = lvim.icons.ui.ArrowCircleLeft,
+      -- right_trunc_marker = lvim.icons.ui.ArrowCircleRight,
       --- name_formatter can be used to change the buffer's label in the bufferline.
       --- Please note some names can/will break the
       --- bufferline so use this at your discretion knowing that it has
@@ -131,7 +131,34 @@ M.config = function()
           padding = 1,
         },
       },
-      color_icons = true, -- whether or not to add the filetype icon highlights
+      -- groups = {
+      --   options = {
+      --     toggle_hidden_on_enter = true, -- when you re-enter a hidden group this options re-opens that group so the buffer is visible
+      --   },
+      --   items = {
+      --     {
+      --       name = "Tests",                                -- Mandatory
+      --       highlight = { underline = true, sp = "blue" }, -- Optional
+      --       priority = 2,                                  -- determines where it will appear relative to other groups (Optional)
+      --       icon = "",                                  -- Optional
+      --       matcher = function(buf)                        -- Mandatory
+      --         return buf.filename:match("%_test") or buf.filename:match("%_spec")
+      --       end,
+      --     },
+      --     {
+      --       name = "Docs",
+      --       highlight = { undercurl = true, sp = "green" },
+      --       auto_close = false, -- whether or not close this group if it doesn't contain the current buffer
+      --       matcher = function(buf)
+      --         return buf.filename:match("%.md") or buf.filename:match("%.txt")
+      --       end,
+      --       separator = { -- Optional
+      --         -- style = require("bufferline.groups").separator.tab,
+      --       },
+      --     },
+      --   },
+      -- },
+      color_icons = true,                 -- whether or not to add the filetype icon highlights
       show_buffer_icons = lvim.use_icons, -- disable filetype icons for buffers
       show_buffer_close_icons = lvim.use_icons,
       show_close_icon = false,
@@ -143,7 +170,7 @@ M.config = function()
       enforce_regular_tabs = false,
       always_show_bufferline = false,
       hover = {
-        enabled = false, -- requires nvim 0.8+
+        enabled = true, -- requires nvim 0.8+
         delay = 200,
         reveal = { "close" },
       },
@@ -154,7 +181,7 @@ M.config = function()
 end
 
 M.setup = function()
-  require("lvim.keymappings").load(lvim.builtin.bufferline.keymap)
+  -- require("lvim.keymappings").load(lvim.builtin.bufferline.keymap)
 
   local status_ok, bufferline = pcall(require, "bufferline")
   if not status_ok then
@@ -207,7 +234,7 @@ function M.buf_kill(kill_command, bufnr, force)
         force = true
       else return
       end
-    elseif api.nvim_buf_get_option(bufnr, "buftype") == "terminal" then
+    elseif api.nvim_get_option_value("buftype", { buf = 0 }) == "terminal" then
       choice = fn.confirm(fmt([[Close "%s"?]], bufname), "&Yes\n&No\n&Cancel")
       if choice == 1 then
         force = true

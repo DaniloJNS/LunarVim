@@ -5,7 +5,7 @@ local base_dir = vim.env.LUNARVIM_BASE_DIR
   end)()
 
 if not vim.tbl_contains(vim.opt.rtp:get(), base_dir) then
-  vim.opt.rtp:prepend(base_dir)
+  vim.opt.rtp:append(base_dir)
 end
 
 require("lvim.bootstrap"):init(base_dir)
@@ -17,6 +17,12 @@ local plugins = require "lvim.plugins"
 require("lvim.plugin-loader").load { plugins, lvim.plugins }
 
 require("lvim.core.theme").setup()
+
+--TODO: load only plugin mappings
+-- use hash separtor only plugins
+reload("lvim.keymappings").load_defaults() -- for load mappins for plugins
+-- load thmes
+-- require('lvim.themes')
 
 local Log = require "lvim.core.log"
 Log:debug "Starting LunarVim"

@@ -70,7 +70,7 @@ local function jumpable(dir)
       local n_next = node.next
       local next_pos = n_next and n_next.mark:pos_begin()
       local candidate = n_next ~= snippet and next_pos and (pos[1] < next_pos[1])
-        or (pos[1] == next_pos[1] and pos[2] < next_pos[2])
+          or (pos[1] == next_pos[1] and pos[2] < next_pos[2])
 
       -- Past unmarked exit node, exit early
       if n_next == nil or n_next == snippet.next then
@@ -168,6 +168,7 @@ M.config = function()
         tmux = "(TMUX)",
         copilot = "(Copilot)",
         treesitter = "(TreeSitter)",
+        orgmode = "(Orgmode)"
       },
       duplicates = {
         buffer = 1,
@@ -194,6 +195,11 @@ M.config = function()
             vim_item.kind_hl_group = "CmpItemKindTabnine"
           end
 
+          if entry.source.name == "orgmode" then
+            vim_item.kind = lvim.icons.ui.Lightbulb
+            vim_item.kind_hl_group = "CmpItemKindOrgMode"
+          end
+
           if entry.source.name == "crates" then
             vim_item.kind = lvim.icons.misc.Package
             vim_item.kind_hl_group = "CmpItemKindCrate"
@@ -211,7 +217,7 @@ M.config = function()
         end
         vim_item.menu = lvim.builtin.cmp.formatting.source_names[entry.source.name]
         vim_item.dup = lvim.builtin.cmp.formatting.duplicates[entry.source.name]
-          or lvim.builtin.cmp.formatting.duplicates_default
+            or lvim.builtin.cmp.formatting.duplicates_default
         return vim_item
       end,
     },
@@ -262,6 +268,9 @@ M.config = function()
           if kind == "Snippet" and ctx.prev_context.filetype == "java" then
             return false
           end
+          if kind == "Text" then
+            return false
+          end
           return true
         end,
       },
@@ -276,6 +285,7 @@ M.config = function()
       { name = "treesitter" },
       { name = "crates" },
       { name = "tmux" },
+      { name = 'orgmode' }
     },
     mapping = cmp_mapping.preset.insert {
       ["<C-k>"] = cmp_mapping(cmp_mapping.select_prev_item(), { "i", "c" }),
@@ -327,12 +337,6 @@ M.config = function()
           end
           if is_insert_mode() then -- prevent overwriting brackets
             confirm_opts.behavior = ConfirmBehavior.Insert
-          end
-          local entry = cmp.get_selected_entry()
-          local is_copilot = entry and entry.source.name == "copilot"
-          if is_copilot then
-            confirm_opts.behavior = ConfirmBehavior.Replace
-            confirm_opts.select = true
           end
           if cmp.confirm(confirm_opts) then
             return -- success, exit early

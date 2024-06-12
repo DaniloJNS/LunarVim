@@ -1,7 +1,7 @@
 return {
   leader = "space",
   reload_config_on_save = true,
-  colorscheme = "lunar",
+  colorscheme = "tokyonight-night",
   transparent_window = false,
   format_on_save = {
     ---@usage boolean: format on save (Default: false)
@@ -14,45 +14,12 @@ return {
     filter = require("lvim.lsp.utils").format_filter,
   },
   keys = {},
-
   use_icons = true,
   icons = require "lvim.icons",
-
   builtin = {},
-
   plugins = {
     -- use config.lua for this not put here
   },
-
-  lazy = {
-    opts = {
-      install = {
-        missing = true,
-        colorscheme = { "lunar", "habamax" },
-      },
-      ui = {
-        border = "rounded",
-      },
-      root = require("lvim.utils").join_paths(get_runtime_dir(), "site", "pack", "lazy", "opt"),
-      git = {
-        timeout = 120,
-      },
-      lockfile = require("lvim.utils").join_paths(get_config_dir(), "lazy-lock.json"),
-      performance = {
-        rtp = {
-          reset = false,
-        },
-      },
-      defaults = {
-        lazy = false,
-        version = nil,
-      },
-      readme = {
-        root = require("lvim.utils").join_paths(get_runtime_dir(), "lazy", "readme"),
-      },
-    },
-  },
-
   autocommands = {},
   lang = {},
   log = {

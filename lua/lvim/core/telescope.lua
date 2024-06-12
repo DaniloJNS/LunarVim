@@ -46,6 +46,9 @@ function M.config()
             actions.open_qflist(...)
           end,
           ["<CR>"] = actions.select_default,
+          ["<Esc>"] = function(...)
+            return actions.close(...)
+          end,
         },
         n = {
           ["<C-n>"] = actions.move_selection_next,
@@ -67,6 +70,7 @@ function M.config()
     pickers = {
       find_files = {
         hidden = true,
+        theme = "ivy"
       },
       live_grep = {
         --@usage don't include the filename in the search results
@@ -93,6 +97,7 @@ function M.config()
       git_files = {
         hidden = true,
         show_untracked = true,
+        theme = "ivy"
       },
       colorscheme = {
         enable_preview = true,
@@ -100,10 +105,13 @@ function M.config()
     },
     extensions = {
       fzf = {
-        fuzzy = true, -- false will only do exact matching
+        fuzzy = true,                   -- false will only do exact matching
         override_generic_sorter = true, -- override the generic sorter
-        override_file_sorter = true, -- override the file sorter
-        case_mode = "smart_case", -- or "ignore_case" or "respect_case"
+        override_file_sorter = true,    -- override the file sorter
+        case_mode = "smart_case",       -- or "ignore_case" or "respect_case"
+      },
+      ["ui-select"] = {
+        require("telescope.themes").get_cursor({}),
       },
     },
   }
@@ -118,7 +126,7 @@ function M.setup()
     grep_previewer = previewers.vim_buffer_vimgrep.new,
     qflist_previewer = previewers.vim_buffer_qflist.new,
     file_sorter = sorters.get_fuzzy_file,
-    generic_sorter = sorters.get_generic_fuzzy_sorter,
+    generic_sorter = sorters.get_fzy_sorter,
   }, lvim.builtin.telescope)
 
   local telescope = require "telescope"
@@ -141,9 +149,11 @@ function M.setup()
   end
 
   if lvim.builtin.telescope.extensions and lvim.builtin.telescope.extensions.fzf then
-    pcall(function()
-      require("telescope").load_extension "fzf"
-    end)
+    local extensions = { "fzf", "ui-select", "frecency", "arecibo", "noice" }
+    telescope = require("telescope")
+    for _, extension in ipairs(extensions) do
+      pcall(function() telescope.load_extension(extension) end)
+    end
   end
 end
 

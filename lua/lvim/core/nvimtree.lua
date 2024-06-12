@@ -6,30 +6,23 @@ function M.config()
     active = true,
     on_config_done = nil,
     setup = {
-      experimental = {},
       auto_reload_on_write = false,
       disable_netrw = false,
       hijack_cursor = false,
       hijack_netrw = true,
       hijack_unnamed_buffer_when_opening = false,
-      sort = {
-        sorter = "name",
-        folders_first = true,
-        files_first = false,
-      },
+      sort_by = "name",
       root_dirs = {},
       prefer_startup_root = false,
       sync_root_with_cwd = true,
       reload_on_bufenter = false,
       respect_buf_cwd = false,
-      on_attach = "default",
+      on_attach = "disable",
       select_prompts = false,
       view = {
         adaptive_size = false,
-        centralize_selection = true,
+        centralize_selection = false,
         width = 30,
-        cursorline = true,
-        debounce_delay = 15,
         side = "left",
         preserve_window_proportions = false,
         number = false,
@@ -51,64 +44,39 @@ function M.config()
       renderer = {
         add_trailing = false,
         group_empty = false,
-        highlight_git = "name",
+        highlight_git = true,
+        full_name = false,
         highlight_opened_files = "none",
         root_folder_label = ":t",
-        full_name = false,
-        indent_width = 2,
-        special_files = { "Cargo.toml", "Makefile", "README.md", "readme.md" },
-        symlink_destination = true,
-        highlight_diagnostics = "none",
-        highlight_modified = "none",
-        highlight_bookmarks = "none",
-        highlight_clipboard = "name",
+        -- indent_width = 1,
         indent_markers = {
-          enable = false,
-          inline_arrows = true,
+          enable = true,
+          inline_arrows = false,
           icons = {
             corner = "└",
             edge = "│",
             item = "│",
-            bottom = "─",
             none = " ",
           },
         },
         icons = {
           webdev_colors = lvim.use_icons,
-
-          web_devicons = {
-            file = {
-              enable = lvim.use_icons,
-              color = lvim.use_icons,
-            },
-            folder = {
-              enable = false,
-              color = lvim.use_icons,
-            },
-          },
           git_placement = "before",
           padding = " ",
           symlink_arrow = " ➛ ",
-          modified_placement = "after",
-          diagnostics_placement = "signcolumn",
-          bookmarks_placement = "signcolumn",
           show = {
             file = lvim.use_icons,
             folder = lvim.use_icons,
-            folder_arrow = lvim.use_icons,
+            folder_arrow = false,
             git = lvim.use_icons,
-            modified = lvim.use_icons,
-            diagnostics = lvim.use_icons,
-            bookmarks = lvim.use_icons,
           },
           glyphs = {
             default = lvim.icons.ui.Text,
             symlink = lvim.icons.ui.FileSymlink,
             bookmark = lvim.icons.ui.BookMark,
-            modified = lvim.icons.ui.Circle,
             folder = {
-              arrow_closed = lvim.icons.ui.TriangleShortArrowRight,
-              arrow_open = lvim.icons.ui.TriangleShortArrowDown,
+              arrow_closed = '',
+              arrow_open = '',
               default = lvim.icons.ui.Folder,
               open = lvim.icons.ui.FolderOpen,
               empty = lvim.icons.ui.EmptyFolder,
@@ -127,6 +95,8 @@ function M.config()
             },
           },
         },
+        special_files = { "Cargo.toml", "Makefile", "README.md", "readme.md" },
+        symlink_destination = true,
       },
       hijack_directories = {
         enable = false,
@@ -134,11 +104,9 @@ function M.config()
       },
       update_focused_file = {
         enable = true,
-        update_root = {
-          enable = true,
-          ignore_list = {},
-        },
-        exclude = false,
+        debounce_delay = 15,
+        update_root = true,
+        ignore_list = {},
       },
       diagnostics = {
         enable = lvim.use_icons,
@@ -157,11 +125,8 @@ function M.config()
         },
       },
       filters = {
-        enable = true,
         dotfiles = false,
         git_clean = false,
-        git_ignored = false,
-        no_bookmark = false,
         no_buffer = false,
         custom = { "node_modules", "\\.cache" },
         exclude = {},
@@ -173,11 +138,10 @@ function M.config()
       },
       git = {
         enable = true,
+        ignore = false,
         show_on_dirs = true,
         show_on_open_dirs = true,
-        disable_for_dirs = {},
-        timeout = 400,
-        cygwin_support = false,
+        timeout = 200,
       },
       actions = {
         use_system_clipboard = true,
@@ -201,7 +165,6 @@ function M.config()
         },
         open_file = {
           quit_on_open = false,
-          eject = true,
           resize_window = false,
           window_picker = {
             enable = true,
@@ -218,7 +181,8 @@ function M.config()
         },
       },
       trash = {
-        cmd = "gio trash",
+        cmd = "trash",
+        require_confirm = true,
       },
       live_filter = {
         prefix = "[FILTER]: ",
@@ -233,22 +197,6 @@ function M.config()
       },
       notify = {
         threshold = vim.log.levels.INFO,
-        absolute_path = true,
-      },
-      ui = {
-        confirm = {
-          remove = true,
-          trash = true,
-          default_yes = false,
-        },
-      },
-      modified = {
-        enable = false,
-        show_on_dirs = true,
-        show_on_open_dirs = true,
-      },
-      help = {
-        sort_by = "key",
       },
       log = {
         enable = false,
@@ -272,18 +220,88 @@ function M.config()
   }
 end
 
-function M.start_telescope(telescope_mode)
-  local node = require("nvim-tree.lib").get_node_at_cursor()
-  local abspath = node.link_to or node.absolute_path
-  local is_folder = node.open ~= nil
-  local basedir = is_folder and abspath or vim.fn.fnamemodify(abspath, ":h")
-  require("telescope.builtin")[telescope_mode] {
-    cwd = basedir,
-  }
+local function copy_file_to()
+  local api = require('nvim-tree.api')
+  local node = api.tree.get_node_under_cursor()
+  local file_src = node.absolute_path
+  vim.notify(file_src)
+  -- The args of input are {prompt}, {default}, {completion}
+  -- Read in the new file path using the existing file's path as the baseline.
+  local file_out = vim.fn.input("COPY TO: ", file_src, "file")
+  -- Create any parent dirs as required
+  local dir = vim.fn.fnamemodify(file_out, ":h")
+  vim.fn.system { 'mkdir', '-p', dir }
+  -- Copy the file
+  vim.fn.system { 'cp', '-R', file_src, file_out }
+end
+
+local function move_file_to()
+  local api = require('nvim-tree.api')
+  local node = api.tree.get_node_under_cursor()
+  local file_src = node.absolute_path
+  -- The args of input are {prompt}, {default}, {completion}
+  -- Read in the new file path using the existing file's path as the baseline.
+  local file_out = vim.fn.input("MOVE TO: ", file_src, "file")
+  -- Create any parent dirs as required
+  local dir = vim.fn.fnamemodify(file_out, ":h")
+  vim.fn.system { 'mkdir', '-p', dir }
+  -- Move the file
+  vim.fn.system { 'mv', file_src, file_out }
 end
 
 local function on_attach(bufnr)
-  local api = require "nvim-tree.api"
+  local api = require("nvim-tree.api")
+  local node = api.node
+
+  local function opts(desc)
+    return { desc = "nvim-tree: " .. desc, buffer = bufnr, noremap = true, silent = true, nowait = true }
+  end
+
+  -- default mappings
+  api.config.mappings.default_on_attach(bufnr)
+
+  local keymap = vim.keymap
+  keymap.set('n', 'l', node.open.edit, opts("Open file"))
+  keymap.set('n', '<cr>', node.open.edit, opts("Open file"))
+  keymap.set('n', 'o', node.open.edit, opts("Open file"))
+  keymap.set('n', 'h', node.navigate.parent_close, opts("Close node"))
+  keymap.set('n', 'v', node.open.vertical, opts("vsplit"))
+  keymap.set('n', 'v', node.open.vertical, opts("vsplit"))
+  keymap.set('n', 'c', copy_file_to, opts("Copy File To"))
+  keymap.set('n', 'M', move_file_to, opts("Move File To"))
+
+
+  -- TODO: Implement following maps
+  -- Add useful keymaps
+  -- if #lvim.builtin.nvimtree.setup.view.mappings.list == 0 then
+  --   lvim.builtin.nvimtree.setup.view.mappings.list = {
+  --     { key = "C",                  action = "cd" },
+  --     { key = "gtf",                action = "telescope_find_files", action_cb = telescope_find_files },
+  --     { key = "gtg",                action = "telescope_live_grep",  action_cb = telescope_live_grep },
+  --   }
+  -- end
+end
+
+function M.setup()
+  local status_ok, nvim_tree = pcall(require, "nvim-tree")
+  if not status_ok then
+    Log:error "Failed to load nvim-tree"
+    return
+  end
+
+  if lvim.builtin.nvimtree._setup_called then
+    Log:debug "ignoring repeated setup call for nvim-tree, see kyazdani42/nvim-tree.lua#1308"
+    return
+  end
+
+  lvim.builtin.nvimtree._setup_called = true
+
+  -- Implicitly update nvim-tree when project module is active
+  if lvim.builtin.project.active then
+    lvim.builtin.nvimtree.setup.respect_buf_cwd = true
+    lvim.builtin.nvimtree.setup.update_cwd = true
+    lvim.builtin.nvimtree.setup.update_focused_file = { enable = true, update_cwd = true }
+  end
 
   local function telescope_find_files(_)
     require("lvim.core.nvimtree").start_telescope "find_files"
@@ -293,52 +311,23 @@ local function on_attach(bufnr)
     require("lvim.core.nvimtree").start_telescope "live_grep"
   end
 
-  local function opts(desc)
-    return { desc = "nvim-tree: " .. desc, buffer = bufnr, noremap = true, silent = true, nowait = true }
-  end
-
-  api.config.mappings.default_on_attach(bufnr)
-
-  local useful_keys = {
-    ["l"] = { api.node.open.edit, opts "Open" },
-    ["o"] = { api.node.open.edit, opts "Open" },
-    ["<CR>"] = { api.node.open.edit, opts "Open" },
-    ["v"] = { api.node.open.vertical, opts "Open: Vertical Split" },
-    ["h"] = { api.node.navigate.parent_close, opts "Close Directory" },
-    ["C"] = { api.tree.change_root_to_node, opts "CD" },
-    ["gtg"] = { telescope_live_grep, opts "Telescope Live Grep" },
-    ["gtf"] = { telescope_find_files, opts "Telescope Find File" },
-  }
-
-  require("lvim.keymappings").load_mode("n", useful_keys)
-end
-
-function M.setup()
-  local status_ok, nvim_tree = pcall(require, "nvim-tree")
-
-  if not status_ok then
-    Log:error "Failed to load nvim-tree"
-    return
-  end
-
-  -- Implicitly update nvim-tree when project module is active
-  if lvim.builtin.project.active then
-    lvim.builtin.nvimtree.setup.respect_buf_cwd = true
-    lvim.builtin.nvimtree.setup.update_cwd = true
-    lvim.builtin.nvimtree.setup.update_focused_file.enable = true
-    lvim.builtin.nvimtree.setup.update_focused_file.update_cwd = true
-  end
-
-  -- Add useful keymaps
-  if lvim.builtin.nvimtree.setup.on_attach == "default" then
-    lvim.builtin.nvimtree.setup.on_attach = on_attach
-  end
+  lvim.builtin.nvimtree.setup.on_attach = on_attach
 
   nvim_tree.setup(lvim.builtin.nvimtree.setup)
 
   if lvim.builtin.nvimtree.on_config_done then
     lvim.builtin.nvimtree.on_config_done(nvim_tree)
   end
+end
+
+function M.start_telescope(telescope_mode)
+  local node = require("nvim-tree.lib").get_node_at_cursor()
+  local abspath = node.link_to or node.absolute_path
+  local is_folder = node.open ~= nil
+  local basedir = is_folder and abspath or vim.fn.fnamemodify(abspath, ":h")
+  require("telescope.builtin")[telescope_mode] {
+    cwd = basedir,
+  }
 end
 
 return M

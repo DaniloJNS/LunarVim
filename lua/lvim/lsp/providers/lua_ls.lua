@@ -5,7 +5,6 @@ local default_workspace = {
     require("neodev.config").types(),
     "${3rd}/busted/library",
     "${3rd}/luassert/library",
-    "${3rd}/luv/library",
   },
 
   maxPreload = 5000,

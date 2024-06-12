@@ -37,41 +37,69 @@ M.config = function()
     },
     options = {
       icons = {
-        Array = icons.Array .. " ",
-        Boolean = icons.Boolean .. " ",
-        Class = icons.Class .. " ",
-        Color = icons.Color .. " ",
-        Constant = icons.Constant .. " ",
-        Constructor = icons.Constructor .. " ",
-        Enum = icons.Enum .. " ",
-        EnumMember = icons.EnumMember .. " ",
-        Event = icons.Event .. " ",
-        Field = icons.Field .. " ",
-        File = icons.File .. " ",
-        Folder = icons.Folder .. " ",
-        Function = icons.Function .. " ",
-        Interface = icons.Interface .. " ",
-        Key = icons.Key .. " ",
-        Keyword = icons.Keyword .. " ",
-        Method = icons.Method .. " ",
-        Module = icons.Module .. " ",
-        Namespace = icons.Namespace .. " ",
-        Null = icons.Null .. " ",
-        Number = icons.Number .. " ",
-        Object = icons.Object .. " ",
-        Operator = icons.Operator .. " ",
-        Package = icons.Package .. " ",
-        Property = icons.Property .. " ",
-        Reference = icons.Reference .. " ",
-        Snippet = icons.Snippet .. " ",
-        String = icons.String .. " ",
-        Struct = icons.Struct .. " ",
-        Text = icons.Text .. " ",
-        TypeParameter = icons.TypeParameter .. " ",
-        Unit = icons.Unit .. " ",
-        Value = icons.Value .. " ",
-        Variable = icons.Variable .. " ",
+        File = ' ',
+        Module = ' ',
+        Namespace = ' ',
+        Package = ' ',
+        Class = ' ',
+        Method = ' ',
+        Property = ' ',
+        Field = ' ',
+        Constructor = ' ',
+        Enum = ' ',
+        Interface = ' ',
+        Function = ' ',
+        Variable = ' ',
+        Constant = ' ',
+        String = ' ',
+        Number = ' ',
+        Boolean = ' ',
+        Array = ' ',
+        Object = ' ',
+        Key = ' ',
+        Null = ' ',
+        EnumMember = ' ',
+        Struct = ' ',
+        Event = ' ',
+        Operator = ' ',
+        TypeParameter = ' '
       },
+      -- icons = {
+      -- Array = icons.Array .. " ",
+      -- Boolean = icons.Boolean,
+      -- Class = icons.Class .. " ",
+      -- Color = icons.Color .. " ",
+      -- Constant = icons.Constant .. " ",
+      -- Constructor = icons.Constructor .. " ",
+      -- Enum = icons.Enum .. " ",
+      -- EnumMember = icons.EnumMember .. " ",
+      -- Event = icons.Event .. " ",
+      -- Field = icons.Field .. " ",
+      -- File = icons.File .. " ",
+      -- Folder = icons.Folder .. " ",
+      -- Function = icons.Function .. " ",
+      -- Interface = icons.Interface .. " ",
+      -- Key = icons.Key .. " ",
+      -- Keyword = icons.Keyword .. " ",
+      -- Method = icons.Method .. " ",
+      -- Module = icons.Module .. " ",
+      -- Namespace = icons.Namespace .. " ",
+      -- Null = icons.Null .. " ",
+      -- Number = icons.Number .. " ",
+      -- Object = icons.Object .. " ",
+      -- Operator = icons.Operator .. " ",
+      -- Package = icons.Package .. " ",
+      -- Property = icons.Property .. " ",
+      -- Reference = icons.Reference .. " ",
+      -- Snippet = icons.Snippet .. " ",
+      -- String = icons.String .. " ",
+      -- Struct = icons.Struct .. " ",
+      -- Text = icons.Text .. " ",
+      -- TypeParameter = icons.TypeParameter .. " ",
+      -- Unit = icons.Unit .. " ",
+      -- Value = icons.Value .. " ",
+      -- Variable = icons.Variable .. " ",
+      -- },
       highlight = true,
       separator = " " .. lvim.icons.ui.ChevronRight .. " ",
       depth_limit = 0,
@@ -158,7 +186,8 @@ local get_gps = function()
   end
 
   if not require("lvim.utils.functions").isempty(gps_location) then
-    return "%#NavicSeparator#" .. lvim.icons.ui.ChevronRight .. "%* " .. gps_location
+    -- return "%#NavicSeparator#" .. lvim.icons.ui.ChevronRight .. "%* " .. gps_location
+    return gps_location
   else
     return ""
   end
@@ -173,12 +202,22 @@ M.get_winbar = function()
     return
   end
   local f = require "lvim.utils.functions"
+
+  local show_filename = false
+  local gps_added = false
   local value = M.get_filename()
 
-  local gps_added = false
-  if not f.isempty(value) then
+  if show_filename then
+    if not f.isempty(value) then
+      local gps_value = get_gps()
+      value = value .. " " .. gps_value
+      if not f.isempty(gps_value) then
+        gps_added = true
+      end
+    end
+  else
     local gps_value = get_gps()
-    value = value .. " " .. gps_value
+    value = gps_value
     if not f.isempty(gps_value) then
       gps_added = true
     end
@@ -195,8 +234,10 @@ M.get_winbar = function()
   end
 
   local num_tabs = #vim.api.nvim_list_tabpages()
+  -- Only show tab indicator when current bufferline is disabled for tab
+  local bufferline_tab_view_enabled = lvim.builtin.bufferline.options.show_tab_indicators
 
-  if num_tabs > 1 and not f.isempty(value) then
+  if num_tabs > 1 and not f.isempty(value) and not bufferline_tab_view_enabled then
     local tabpage_number = tostring(vim.api.nvim_tabpage_get_number(0))
     value = value .. "%=" .. tabpage_number .. "/" .. tostring(num_tabs)
   end
@@ -209,27 +250,29 @@ end
 
 M.create_winbar = function()
   vim.api.nvim_create_augroup("_winbar", {})
-  vim.api.nvim_create_autocmd({
-    "CursorHoldI",
-    "CursorHold",
-    "BufWinEnter",
-    "BufFilePost",
-    "InsertEnter",
-    "BufWritePost",
-    "TabClosed",
-    "TabEnter",
-  }, {
-    group = "_winbar",
-    callback = function()
-      if lvim.builtin.breadcrumbs.active then
-        local status_ok, _ = pcall(vim.api.nvim_buf_get_var, 0, "lsp_floating_window")
-        if not status_ok then
-          -- TODO:
-          require("lvim.core.breadcrumbs").get_winbar()
+  if vim.fn.has "nvim-0.8" == 1 then
+    vim.api.nvim_create_autocmd({
+      "CursorHoldI",
+      "CursorHold",
+      "BufWinEnter",
+      "BufFilePost",
+      "InsertEnter",
+      "BufWritePost",
+      "TabClosed",
+      "TabEnter",
+    }, {
+      group = "_winbar",
+      callback = function()
+        if lvim.builtin.breadcrumbs.active then
+          local status_ok, _ = pcall(vim.api.nvim_buf_get_var, 0, "lsp_floating_window")
+          if not status_ok then
+            -- TODO:
+            require("lvim.core.breadcrumbs").get_winbar()
+          end
         end
-      end
-    end,
-  })
+      end,
+    })
+  end
 end
 
 return M

@@ -39,22 +39,13 @@ function plugin_loader.init(opts)
       }
     end
 
-    vim.api.nvim_create_autocmd("User", { pattern = "LazyDone", callback = require("lvim.lsp").setup })
+    vim.schedule(function()
+      require("lvim.lsp").setup()
+    end)
   end
 
-  local rtp = vim.opt.rtp:get()
-  local base_dir = (vim.env.LUNARVIM_BASE_DIR or get_runtime_dir() .. "/lvim"):gsub("\\", "/")
-  local idx_base = #rtp + 1
-  for i, path in ipairs(rtp) do
-    path = path:gsub("\\", "/")
-    if path == base_dir then
-      idx_base = i + 1
-      break
-    end
-  end
-  table.insert(rtp, idx_base, lazy_install_dir)
-  table.insert(rtp, idx_base + 1, join_paths(plugins_dir, "*"))
-  vim.opt.rtp = rtp
+  vim.opt.runtimepath:append(lazy_install_dir)
+  vim.opt.runtimepath:append(join_paths(plugins_dir, "*"))
 
   pcall(function()
     -- set a custom path for lazy's cache
@@ -102,8 +93,34 @@ function plugin_loader.load(configurations)
   vim.opt.runtimepath:remove(join_paths(plugins_dir, "*"))
 
   local status_ok = xpcall(function()
-    table.insert(lvim.lazy.opts.install.colorscheme, 1, lvim.colorscheme)
-    lazy.setup(configurations, lvim.lazy.opts)
+    local opts = {
+      install = {
+        missing = true,
+        colorscheme = { lvim.colorscheme, "lunar", "habamax" },
+      },
+      ui = {
+        border = "rounded",
+      },
+      root = plugins_dir,
+      git = {
+        timeout = 120,
+      },
+      lockfile = join_paths(get_config_dir(), "lazy-lock.json"),
+      performance = {
+        rtp = {
+          reset = false,
+        },
+      },
+      defaults = {
+        lazy = false,
+        version = nil,
+      },
+      readme = {
+        root = join_paths(get_runtime_dir(), "lazy", "readme"),
+      },
+    }
+
+    lazy.setup(configurations, opts)
   end, debug.traceback)
 
   if not status_ok then

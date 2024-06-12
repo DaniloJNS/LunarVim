@@ -13,4 +13,12 @@ function M.get_buf_option(opt)
   end
 end
 
+function M.vim_opts(options)
+  for scope, table in pairs(options) do
+    for setting, value in pairs(table) do
+      vim[scope][setting] = value
+    end
+  end
+end
+
 return M
