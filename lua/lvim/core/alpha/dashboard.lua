@@ -125,11 +125,13 @@ function M.get_sections()
       spacing = 1,
     },
     entries = {
-      { "f", lvim.icons.ui.FindFile .. "  Find File", "<CMD>Telescope find_files<CR>" },
-      { "n", lvim.icons.ui.NewFile .. "  New File", "<CMD>ene!<CR>" },
-      { "p", lvim.icons.ui.Project .. "  Projects ", "<CMD>Telescope projects<CR>" },
+      { "f", lvim.icons.ui.FindFile .. "  Find File",   "<CMD>Telescope find_files<CR>" },
+      { "l", "鈴" .. " Lazy",                          ":Lazy<CR>" },
+      { "n", lvim.icons.ui.NewFile .. "  New File",     "<CMD>ene!<CR>" },
+      { "p", lvim.icons.ui.Project .. "  Projects ",    "<CMD>Telescope projects<CR>" },
       { "r", lvim.icons.ui.History .. "  Recent files", ":Telescope oldfiles <CR>" },
-      { "t", lvim.icons.ui.FindText .. "  Find Text", "<CMD>Telescope live_grep<CR>" },
+      { "s", "勒" .. " Restore Session",               [[:lua require("persistence").load() <cr>]] },
+      { "t", lvim.icons.ui.FindText .. "  Find Text",   "<CMD>Telescope live_grep<CR>" },
       {
         "c",
         lvim.icons.ui.Gear .. "  Configuration",
