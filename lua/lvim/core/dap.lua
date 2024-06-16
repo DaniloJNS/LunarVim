@@ -102,7 +102,135 @@ M.setup = function()
   if not status_ok then
     return
   end
+  dap.adapters.go = function(callback, config)
+    local stdout = vim.loop.new_pipe(false)
+    local handle
+    local pid_or_err
+    local host = config.host or "127.0.0.1"
+    local port = config.port or "38697"
+    local addr = string.format("%s:%s", host, port)
+    if (config.request == "attach" and config.mode == "remote") then
+      -- Not starting delve server automatically in "Attach remote."
+      -- Will connect to delve server that is listening to [host]:[port] instead.
+      -- Users can use this with delve headless mode:
+      --
+      -- dlv debug -l 127.0.0.1:38697 --headless ./cmd/main.go
+      --
+      local msg = string.format("connecting to server at '%s'...", addr)
+      print(msg)
+    else
+      local opts = {
+        stdio = { nil, stdout },
+        args = { "dap", "-l", addr },
+        detached = true
+      }
+      handle, pid_or_err = vim.loop.spawn("dlv", opts, function(code)
+        stdout:close()
+        handle:close()
+        if code ~= 0 then
+          print('dlv exited with code', code)
+        end
+      end)
+      assert(handle, 'Error running dlv: ' .. tostring(pid_or_err))
+      stdout:read_start(function(err, chunk)
+        assert(not err, err)
+        if chunk then
+          vim.schedule(function()
+            require('dap.repl').append(chunk)
+          end)
+        end
+      end)
+    end
+    -- Wait for delve to start
+    vim.defer_fn(
+      function()
+        callback({ type = "server", host = host, port = port })
+      end,
+      100)
+  end
 
+  dap.adapters.ruby = function(callback, config)
+    local stdout = vim.loop.new_pipe(false)
+    local waiting = config.waiting or 500
+
+    stdout:read_start(function(err, chunk)
+      assert(not err, err)
+      if chunk then
+        vim.schedule(function()
+          require('dap.repl').append(chunk)
+        end)
+      end
+    end)
+
+    -- Wait for rdbg to start
+    vim.defer_fn(
+      function()
+        callback({ type = "server", host = config.server, port = config.port })
+      end,
+      waiting)
+  end
+
+  dap.configurations.ruby = {
+    {
+      type = "ruby",
+      name = "debug current file",
+      request = "attach",
+      localfs = "/home/danilo/Repositorios/rebase/workspace/youse/pricing-engine:/opt/app",
+      server = "127.0.0.1",
+      port = "4000"
+    },
+    {
+      type = "ruby",
+      name = "run current spec file",
+      request = "attach",
+      localfs = true,
+      command = "rspec",
+      script = "${file}",
+    },
+  }
+  dap.configurations.go = {
+    {
+      type = "go",
+      name = "Debug",
+      request = "launch",
+      program = "${file}",
+    },
+    {
+      type = "go",
+      name = "Debug Package",
+      request = "launch",
+      program = "${fileDirname}",
+    },
+    {
+      type = "go",
+      name = "Attach remote",
+      mode = "remote",
+      request = "attach",
+    },
+    {
+      type = "go",
+      name = "Attach",
+      mode = "local",
+      request = "attach",
+      processId = require('dap.utils').pick_process,
+    },
+    {
+      type = "go",
+      name = "Debug test",
+      request = "launch",
+      mode = "test",
+      program = "${file}",
+    },
+    {
+      type = "go",
+      name = "Debug test (go.mod)",
+      request = "launch",
+      mode = "test",
+      program = "./${relativeFileDirname}",
+    }
+  }
+
+  vim.notify("Configurando DAP UI...")
   if lvim.use_icons then
     vim.fn.sign_define("DapBreakpoint", lvim.builtin.dap.breakpoint)
     vim.fn.sign_define("DapBreakpointRejected", lvim.builtin.dap.breakpoint_rejected)
@@ -121,6 +249,7 @@ M.setup_ui = function()
   if not status_ok then
     return
   end
+  vim.notify("Configurando DAP UI...")
   local dapui = require "dapui"
   dapui.setup(lvim.builtin.dap.ui.config)
 
@@ -134,6 +263,44 @@ M.setup_ui = function()
     -- dap.listeners.before.event_exited["dapui_config"] = function()
     --   dapui.close()
     -- end
+  end
+
+  local utils = require "lvim.utils"
+
+  dap.listeners.after.event_initialized["dapui_config"] = function()
+    if utils.has_plugin("focus") then
+      vim.cmd('FocusDisable')
+    end
+
+    if utils.has_plugin("windows") then
+      vim.cmd(':WindowsDisableAutowidth')
+    end
+
+    dapui.open()
+  end
+
+  dap.listeners.before.event_terminated["dapui_config"] = function()
+    if utils.has_plugin("focus") then
+      vim.cmd('FocusEnable')
+    end
+
+    if utils.has_plugin("windows") then
+      vim.cmd(':WindowsEnableAutowidth')
+    end
+
+    dapui.close()
+  end
+
+  dap.listeners.before.event_exited["dapui_config"] = function()
+    if utils.has_plugin("focus") then
+      vim.cmd('FocusEnable')
+    end
+
+    if utils.has_plugin("windows") then
+      vim.cmd(':WindowsEnableAutowidth')
+    end
+
+    dapui.close()
   end
 
   local Log = require "lvim.core.log"
