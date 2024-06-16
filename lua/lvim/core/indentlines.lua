@@ -6,7 +6,7 @@ M.config = function()
     on_config_done = nil,
     options = {
       enabled = true,
-      buftype_exclude = { "terminal", "nofile" },
+      buftype_exclude = { "terminal", "nofile", "help", "alpha", "dashboard", "neo-tree", "Trouble", "lazy" },
       filetype_exclude = {
         "help",
         "startify",
