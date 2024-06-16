@@ -168,6 +168,7 @@ M.config = function()
         tmux = "(TMUX)",
         copilot = "(Copilot)",
         treesitter = "(TreeSitter)",
+        orgmode = "(Orgmode)"
       },
       duplicates = {
         buffer = 1,
@@ -192,6 +193,11 @@ M.config = function()
           if entry.source.name == "cmp_tabnine" then
             vim_item.kind = lvim.icons.misc.Robot
             vim_item.kind_hl_group = "CmpItemKindTabnine"
+          end
+
+          if entry.source.name == "orgmode" then
+            vim_item.kind = lvim.icons.ui.Lightbulb
+            vim_item.kind_hl_group = "CmpItemKindOrgMode"
           end
 
           if entry.source.name == "crates" then
@@ -262,6 +268,9 @@ M.config = function()
           if kind == "Snippet" and ctx.prev_context.filetype == "java" then
             return false
           end
+          if kind == "Text" then
+            return false
+          end
           return true
         end,
       },
@@ -276,6 +285,7 @@ M.config = function()
       { name = "treesitter" },
       { name = "crates" },
       { name = "tmux" },
+      { name = 'orgmode' }
     },
     mapping = cmp_mapping.preset.insert {
       ["<C-k>"] = cmp_mapping(cmp_mapping.select_prev_item(), { "i", "c" }),
