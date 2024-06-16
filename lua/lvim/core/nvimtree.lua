@@ -325,34 +325,22 @@ local function on_attach(bufnr)
     require("lvim.core.nvimtree").start_telescope "live_grep"
   end
 
-  local function opts(desc)
-    return { desc = "nvim-tree: " .. desc, buffer = bufnr, noremap = true, silent = true, nowait = true }
-  end
+  local mappings = { n = {} }
+  local base_opts = { buffer = bufnr, noremap = true, silent = true, nowait = true }
 
-  local mappings = {}
+  mappings.n['l'] = { node.open.edit, desc = "Open file" }
+  mappings.n['<cr>'] = { node.open.edit, desc = "Open file" }
+  mappings.n['o'] = { node.open.edit, desc = "Open file" }
+  mappings.n['h'] = { node.navigate.parent_close, desc = "Close node" }
+  mappings.n['v'] = { node.open.vertical, desc = "vsplit" }
+  mappings.n['v'] = { node.open.vertical, desc = "vsplit" }
+  mappings.n['c'] = { copy_file_to, desc = "Copy File To" }
+  mappings.n['C'] = { api.tree.change_root_to_node, desc = "CD" }
+  mappings.n['M'] = { move_file_to, desc = "Move File To" }
+  mappings.n['gtf'] = { telescope_find_files, desc = "Move File To" }
+  mappings.n['gtg'] = { telescope_live_grep, desc = "Move File To" }
 
-  mappings.n['l'] = { node.open.edit, opts("Open file") }
-  mappings.n['<cr>'] = { node.open.edit, opts("Open file") }
-  mappings.n['o'] = { node.open.edit, opts("Open file") }
-  mappings.n['h'] = { node.navigate.parent_close, opts("Close node") }
-  mappings.n['v'] = { node.open.vertical, opts("vsplit") }
-  mappings.n['v'] = { node.open.vertical, opts("vsplit") }
-  mappings.n['c'] = { copy_file_to, opts("Copy File To") }
-  mappings.n['C'] = { api.tree.change_root_to_node, opts "CD" }
-  mappings.n['M'] = { move_file_to, opts("Move File To") }
-  mappings.n['gtf'] = { telescope_find_files, opts("Move File To") }
-  mappings.n['gtg'] = { telescope_live_grep, opts("Move File To") }
-
-  require("lvim.keymappings").set_mappings(mappings)
-
-
-  -- TODO: Implement following maps
-  -- Add useful keymaps
-  -- if #lvim.builtin.nvimtree.setup.view.mappings.list == 0 then
-  --   lvim.builtin.nvimtree.setup.view.mappings.list = {
-  --     { key = "C",                  action = "cd" },
-  --   }
-  -- end
+  require("lvim.keymappings").set_mappings(mappings, base_opts)
 end
 
 function M.setup()
