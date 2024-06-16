@@ -109,6 +109,7 @@ function M.load_defaults()
           local cursorline_hl = vim.api.nvim_get_hl(0, { name = "CursorLine" })
           local normal_hl = vim.api.nvim_get_hl(0, { name = "Normal" })
           vim.api.nvim_set_hl(0, "CmpItemKindCopilot", { fg = "#6CC644" })
+          vim.api.nvim_set_hl(0, "CmpItemKindOrgMode", { fg = "#6CC644" })
           vim.api.nvim_set_hl(0, "CmpItemKindTabnine", { fg = "#CA42F0" })
           vim.api.nvim_set_hl(0, "CmpItemKindCrate", { fg = "#F64D00" })
           vim.api.nvim_set_hl(0, "CmpItemKindEmoji", { fg = "#FDE030" })
@@ -149,6 +150,27 @@ function M.load_defaults()
         end,
       },
     },
+    {
+      "FileType",
+      {
+        pattern = { "ruby" },
+        group = "_filetype_settings",
+        callback = function()
+          vim.opt_local.textwidth = 120
+          vim.opt_local.colorcolumn = { 120 }
+        end,
+      }
+    },
+    {
+      "BufWritePre",
+      {
+        pattern = { "*.go" },
+        group = "_filetype_settings",
+        callback = function()
+          vim.lsp.buf.code_action({ context = { only = { 'source.organizeImports' } }, apply = true })
+        end
+      }
+    }
   }
 
   M.define_autocmds(definitions)
@@ -196,13 +218,16 @@ function M.configure_format_on_save()
 end
 
 function M.toggle_format_on_save()
+  local Util = require("lazy.core.util")
   local exists, autocmds = pcall(vim.api.nvim_get_autocmds, {
     group = "lsp_format_on_save",
     event = "BufWritePre",
   })
   if not exists or #autocmds == 0 then
+    Util.info("Enabled format on save")
     M.enable_format_on_save()
   else
+    Util.warn("Disabled format on save")
     M.disable_format_on_save()
   end
 end
