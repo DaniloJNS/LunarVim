@@ -282,8 +282,40 @@ function M.start_telescope(telescope_mode)
   }
 end
 
+local function copy_file_to()
+  local api = require('nvim-tree.api')
+  local node = api.tree.get_node_under_cursor()
+  local file_src = node.absolute_path
+  vim.notify(file_src)
+  -- The args of input are {prompt}, {default}, {completion}
+  -- Read in the new file path using the existing file's path as the baseline.
+  local file_out = vim.fn.input("COPY TO: ", file_src, "file")
+  -- Create any parent dirs as required
+  local dir = vim.fn.fnamemodify(file_out, ":h")
+  vim.fn.system { 'mkdir', '-p', dir }
+  -- Copy the file
+  vim.fn.system { 'cp', '-R', file_src, file_out }
+end
+
+local function move_file_to()
+  local api = require('nvim-tree.api')
+  local node = api.tree.get_node_under_cursor()
+  local file_src = node.absolute_path
+  -- The args of input are {prompt}, {default}, {completion}
+  -- Read in the new file path using the existing file's path as the baseline.
+  local file_out = vim.fn.input("MOVE TO: ", file_src, "file")
+  -- Create any parent dirs as required
+  local dir = vim.fn.fnamemodify(file_out, ":h")
+  vim.fn.system { 'mkdir', '-p', dir }
+  -- Move the file
+  vim.fn.system { 'mv', file_src, file_out }
+end
+
 local function on_attach(bufnr)
   local api = require "nvim-tree.api"
+  local node = api.node
+  -- default mappings
+  api.config.mappings.default_on_attach(bufnr)
 
   local function telescope_find_files(_)
     require("lvim.core.nvimtree").start_telescope "find_files"
@@ -297,20 +329,30 @@ local function on_attach(bufnr)
     return { desc = "nvim-tree: " .. desc, buffer = bufnr, noremap = true, silent = true, nowait = true }
   end
 
-  api.config.mappings.default_on_attach(bufnr)
+  local mappings = {}
 
-  local useful_keys = {
-    ["l"] = { api.node.open.edit, opts "Open" },
-    ["o"] = { api.node.open.edit, opts "Open" },
-    ["<CR>"] = { api.node.open.edit, opts "Open" },
-    ["v"] = { api.node.open.vertical, opts "Open: Vertical Split" },
-    ["h"] = { api.node.navigate.parent_close, opts "Close Directory" },
-    ["C"] = { api.tree.change_root_to_node, opts "CD" },
-    ["gtg"] = { telescope_live_grep, opts "Telescope Live Grep" },
-    ["gtf"] = { telescope_find_files, opts "Telescope Find File" },
-  }
+  mappings.n['l'] = { node.open.edit, opts("Open file") }
+  mappings.n['<cr>'] = { node.open.edit, opts("Open file") }
+  mappings.n['o'] = { node.open.edit, opts("Open file") }
+  mappings.n['h'] = { node.navigate.parent_close, opts("Close node") }
+  mappings.n['v'] = { node.open.vertical, opts("vsplit") }
+  mappings.n['v'] = { node.open.vertical, opts("vsplit") }
+  mappings.n['c'] = { copy_file_to, opts("Copy File To") }
+  mappings.n['C'] = { api.tree.change_root_to_node, opts "CD" }
+  mappings.n['M'] = { move_file_to, opts("Move File To") }
+  mappings.n['gtf'] = { telescope_find_files, opts("Move File To") }
+  mappings.n['gtg'] = { telescope_live_grep, opts("Move File To") }
 
-  require("lvim.keymappings").load_mode("n", useful_keys)
+  require("lvim.keymappings").set_mappings(mappings)
+
+
+  -- TODO: Implement following maps
+  -- Add useful keymaps
+  -- if #lvim.builtin.nvimtree.setup.view.mappings.list == 0 then
+  --   lvim.builtin.nvimtree.setup.view.mappings.list = {
+  --     { key = "C",                  action = "cd" },
+  --   }
+  -- end
 end
 
 function M.setup()
