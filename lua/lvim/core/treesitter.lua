@@ -6,8 +6,26 @@ function M.config()
     on_config_done = nil,
 
     -- A list of parser names, or "all"
-    ensure_installed = { "comment", "markdown_inline", "regex" },
-
+    ensure_installed = {
+      "bash",
+      "html",
+      "javascript",
+      "json",
+      "lua",
+      "markdown",
+      "markdown_inline",
+      "python",
+      "query",
+      "regex",
+      "tsx",
+      "typescript",
+      "vim",
+      "yaml",
+      "ruby",
+      "c",
+      "haskell",
+      "org"
+    },
     -- List of parsers to ignore installing (for "all")
     ignore_install = {},
 
@@ -24,7 +42,7 @@ function M.config()
 
     matchup = {
       enable = false, -- mandatory, false will disable the whole extension
-      -- disable = { "c", "ruby" },  -- optional, list of language that will be disabled
+      disable = {},   -- optional, list of language that will be disabled
     },
     highlight = {
       enable = true, -- false will disable the whole extension
