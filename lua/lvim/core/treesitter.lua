@@ -56,36 +56,117 @@ function M.config()
         return status_ok and big_file_detected
       end,
     },
-    context_commentstring = {
-      enable = true,
-      enable_autocmd = false,
-      config = {
-        -- Languages that have a single comment style
-        typescript = "// %s",
-        css = "/* %s */",
-        scss = "/* %s */",
-        html = "<!-- %s -->",
-        svelte = "<!-- %s -->",
-        vue = "<!-- %s -->",
-        json = "",
-      },
-    },
+    -- context_commentstring = {
+    --   enable = true,
+    --   enable_autocmd = false,
+    --   config = {
+    --     -- Languages that have a single comment style
+    --     typescript = "// %s",
+    --     css = "/* %s */",
+    --     scss = "/* %s */",
+    --     html = "<!-- %s -->",
+    --     svelte = "<!-- %s -->",
+    --     vue = "<!-- %s -->",
+    --     json = "",
+    --   },
+    -- },
     indent = { enable = true, disable = { "yaml", "python" } },
     autotag = { enable = false },
     textobjects = {
-      swap = {
-        enable = false,
-        -- swap_next = textobj_swap_keymaps,
-      },
-      -- move = textobj_move_keymaps,
       select = {
-        enable = false,
-        -- keymaps = textobj_sel_keymaps,
+        enable = true,
+        -- Automatically jump forward to textobj, similar to targets.vim
+        lookahead = true,
+        keymaps = {
+          -- You can use the capture groups defined in textobjects.scm
+          ["af"] = "@function.outer",
+          ["if"] = "@function.inner",
+          ["ac"] = "@class.outer",
+          -- You can optionally set descriptions to the mappings (used in the desc parameter of
+          -- nvim_buf_set_keymap) which plugins like which-key display
+          ["ic"] = { query = "@class.inner", desc = "Select inner part of a class region" },
+          -- You can also use captures from other query groups like `locals.scm`
+          ["as"] = { query = "@scope", query_group = "locals", desc = "Select language scope" },
+        },
+        -- You can choose the select mode (default is charwise 'v')
+        --
+        -- Can also be a function which gets passed a table with the keys
+        -- * query_string: eg '@function.inner'
+        -- * method: eg 'v' or 'o'
+        -- and should return the mode ('v', 'V', or '<c-v>') or a table
+        -- mapping query_strings to modes.
+        selection_modes = {
+          ['@parameter.outer'] = 'v', -- charwise
+          ['@function.outer'] = 'V',  -- linewise
+          ['@class.outer'] = '<c-v>', -- blockwise
+        },
+        -- If you set this to `true` (default is `false`) then any textobject is
+        -- extended to include preceding or succeeding whitespace. Succeeding
+        -- whitespace has priority in order to act similarly to eg the built-in
+        -- `ap`.
+        --
+        -- Can also be a function which gets passed a table with the keys
+        -- * query_string: eg '@function.inner'
+        -- * selection_mode: eg 'v'
+        -- and should return true of false
+        include_surrounding_whitespace = true,
+      },
+      swap = {
+        enable = true,
+        swap_next = {
+          ["<leader>a"] = "@parameter.inner",
+        },
+        swap_previous = {
+          ["<leader>A"] = "@parameter.inner",
+        },
+      },
+      move = {
+        enable = true,
+        set_jumps = true, -- whether to set jumps in the jumplist
+        goto_next_start = {
+          ["]m"] = "@function.outer",
+          ["]]"] = { query = "@class.outer", desc = "Next class start" },
+          --
+          -- You can use regex matching (i.e. lua pattern) and/or pass a list in a "query" key to group multiple queires.
+          ["]o"] = "@loop.*",
+          -- ["]o"] = { query = { "@loop.inner", "@loop.outer" } }
+          --
+          -- You can pass a query group to use query from `queries/<lang>/<query_group>.scm file in your runtime path.
+          -- Below example nvim-treesitter's `locals.scm` and `folds.scm`. They also provide highlights.scm and indent.scm.
+          ["]s"] = { query = "@scope", query_group = "locals", desc = "Next scope" },
+          ["]z"] = { query = "@fold", query_group = "folds", desc = "Next fold" },
+        },
+        goto_next_end = {
+          ["]M"] = "@function.outer",
+          ["]["] = "@class.outer",
+        },
+        goto_previous_start = {
+          ["[m"] = "@function.outer",
+          ["[["] = "@class.outer",
+        },
+        goto_previous_end = {
+          ["[M"] = "@function.outer",
+          ["[]"] = "@class.outer",
+        },
+        -- Below will go to either the start or the end, whichever is closer.
+        -- Use if you want more granular movements
+        -- Make it even more gradual by adding multiple queries and regex.
+        goto_next = {
+          ["]d"] = "@conditional.outer",
+        },
+        goto_previous = {
+          ["[d"] = "@conditional.outer",
+        }
       },
     },
     textsubjects = {
-      enable = false,
-      keymaps = { ["."] = "textsubjects-smart", [";"] = "textsubjects-big" },
+      enable = true,
+      prev_selection = ',', -- (Optional) keymap to select the previous selection
+      keymaps = {
+        ['<cr>'] = 'textsubjects-smart',
+        [';'] = 'textsubjects-container-outer',
+        ['i;'] = { 'textsubjects-container-inner', desc = "Select inside containers (classes, functions, etc.)" },
+      },
     },
     playground = {
       enable = false,
@@ -104,11 +185,6 @@ function M.config()
         goto_node = "<cr>",
         show_help = "?",
       },
-    },
-    rainbow = {
-      enable = false,
-      extended_mode = true, -- Highlight also non-parentheses delimiters, boolean or table: lang -> boolean
-      max_file_lines = 1000, -- Do not enable for files with more than 1000 lines, int
     },
   }
 end
@@ -135,8 +211,8 @@ function M.setup()
   local opts = vim.deepcopy(lvim.builtin.treesitter)
 
   -- handle deprecated API, https://github.com/JoosepAlviste/nvim-ts-context-commentstring/issues/82
-  ts_context_commentstring.setup(opts.context_commentstring)
-  opts.context_commentstring = nil
+  -- ts_context_commentstring.setup(opts.context_commentstring)
+  -- opts.context_commentstring = nil
 
   treesitter_configs.setup(opts)
 

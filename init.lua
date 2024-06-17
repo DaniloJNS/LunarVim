@@ -18,6 +18,12 @@ require("lvim.plugin-loader").load { plugins, lvim.plugins }
 
 require("lvim.core.theme").setup()
 
+--TODO: load only plugin mappings
+-- use hash separtor only plugins
+reload("lvim.keymappings").load_defaults() -- for load mappins for plugins
+-- load thmes
+-- require('lvim.themes')
+
 local Log = require "lvim.core.log"
 Log:debug "Starting LunarVim"
 

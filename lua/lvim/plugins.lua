@@ -524,6 +524,17 @@ local core_plugins = {
   --   enabled = lvim.builtin.lualine.active,
   -- },
 
+  -- {
+  --   -- "hoob3rt/lualine.nvim",
+  --   "nvim-lualine/lualine.nvim",
+  --   -- "Lunarvim/lualine.nvim",
+  --   config = function()
+  --     require("lvim.core.lualine").setup()
+  --   end,
+  --   event = "VimEnter",
+  --   enabled = lvim.builtin.lualine.active,
+  -- },
+
   -- breadcrumbs
   {
     "SmiteshP/nvim-navic",

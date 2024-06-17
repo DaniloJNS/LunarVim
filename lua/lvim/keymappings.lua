@@ -483,7 +483,6 @@ local function map(mode, lhs, rhs, opts)
   -- end
 end
 
-vim.keymap.set("n", "<leader>ja", "<cmd>%!python -m json.tool<cr>", { desc = "Format json file" })
 -- local map = vim.keymap.set
 function M.set_mappings(map_table, base)
   -- iterate over the first keys for each mode
