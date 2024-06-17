@@ -245,96 +245,272 @@ local core_plugins = {
 
   -- Status Line and Bufferline
   {
+    "DaniloJNS/astroui",
+    lazy = true,
+    opts = {
+      icons = {
+        ActiveLSP = "",
+        ActiveTS = "",
+        ArrowLeft = "",
+        ArrowRight = "",
+        Bookmarks = "",
+        BufferClose = "󰅖",
+        DapBreakpoint = "",
+        DapBreakpointCondition = "",
+        DapBreakpointRejected = "",
+        DapLogPoint = "󰛿",
+        DapStopped = "󰁕",
+        Debugger = "",
+        DefaultFile = "󰈙",
+        Diagnostic = "󰒡",
+        DiagnosticError = "",
+        DiagnosticHint = "󰌵",
+        DiagnosticInfo = "󰋼",
+        DiagnosticWarn = "",
+        Ellipsis = "…",
+        Environment = "",
+        FileNew = "",
+        FileModified = "",
+        FileReadOnly = "",
+        FoldClosed = "",
+        FoldOpened = "",
+        FoldSeparator = " ",
+        FolderClosed = "",
+        FolderEmpty = "",
+        FolderOpen = "",
+        Git = "󰊢",
+        GitAdd = "",
+        GitBranch = "",
+        GitChange = "",
+        GitConflict = "",
+        GitDelete = "",
+        GitIgnored = "◌",
+        GitRenamed = "➜",
+        GitSign = "▎",
+        GitStaged = "✓",
+        GitUnstaged = "✗",
+        GitUntracked = "★",
+        LSPLoading1 = "",
+        LSPLoading2 = "󰀚",
+        LSPLoading3 = "",
+        MacroRecording = "",
+        Package = "󰏖",
+        Paste = "󰅌",
+        Refresh = "",
+        Search = "",
+        Selected = "❯",
+        Session = "󱂬",
+        Sort = "󰒺",
+        Spellcheck = "󰓆",
+        Tab = "󰓩",
+        TabClose = "󰅙",
+        Terminal = "",
+        Window = "",
+        WordFile = "󰈭",
+      },
+    },
+  },
+  {
+    "DaniloJNS/astroui",
+    opts = function(_, opts)
+      opts.status = {
+        fallback_colors = {
+          none = "NONE",
+          fg = "#abb2bf",
+          bg = "#1e222a",
+          dark_bg = "#2c323c",
+          blue = "#61afef",
+          green = "#98c379",
+          grey = "#5c6370",
+          bright_grey = "#777d86",
+          dark_grey = "#5c5c5c",
+          orange = "#ff9640",
+          purple = "#c678dd",
+          bright_purple = "#a9a1e1",
+          red = "#e06c75",
+          bright_red = "#ec5f67",
+          white = "#c9c9c9",
+          yellow = "#e5c07b",
+          bright_yellow = "#ebae34",
+        },
+        modes = {
+          ["n"] = { "NORMAL", "normal" },
+          ["no"] = { "OP", "normal" },
+          ["nov"] = { "OP", "normal" },
+          ["noV"] = { "OP", "normal" },
+          ["no"] = { "OP", "normal" },
+          ["niI"] = { "NORMAL", "normal" },
+          ["niR"] = { "NORMAL", "normal" },
+          ["niV"] = { "NORMAL", "normal" },
+          ["i"] = { "INSERT", "insert" },
+          ["ic"] = { "INSERT", "insert" },
+          ["ix"] = { "INSERT", "insert" },
+          ["t"] = { "TERM", "terminal" },
+          ["nt"] = { "TERM", "terminal" },
+          ["v"] = { "VISUAL", "visual" },
+          ["vs"] = { "VISUAL", "visual" },
+          ["V"] = { "LINES", "visual" },
+          ["Vs"] = { "LINES", "visual" },
+          [""] = { "BLOCK", "visual" },
+          ["s"] = { "BLOCK", "visual" },
+          ["R"] = { "REPLACE", "replace" },
+          ["Rc"] = { "REPLACE", "replace" },
+          ["Rx"] = { "REPLACE", "replace" },
+          ["Rv"] = { "V-REPLACE", "replace" },
+          ["s"] = { "SELECT", "visual" },
+          ["S"] = { "SELECT", "visual" },
+          [""] = { "BLOCK", "visual" },
+          ["c"] = { "COMMAND", "command" },
+          ["cv"] = { "COMMAND", "command" },
+          ["ce"] = { "COMMAND", "command" },
+          ["r"] = { "PROMPT", "inactive" },
+          ["rm"] = { "MORE", "inactive" },
+          ["r?"] = { "CONFIRM", "inactive" },
+          ["!"] = { "SHELL", "inactive" },
+          ["null"] = { "null", "inactive" },
+        },
+        separators = {
+          none = { "", "" },
+          left = { "", "  " },
+          right = { "  ", "" },
+          center = { "  ", "  " },
+          tab = { "", " " },
+          breadcrumbs = "  ",
+          path = "  ",
+        },
+        attributes = {
+          buffer_active = { bold = true, italic = true },
+          buffer_picker = { bold = true },
+          macro_recording = { bold = true },
+          git_branch = { bold = true },
+          git_diff = { bold = true },
+          virtual_env = { bold = true },
+        },
+        icon_highlights = {
+          file_icon = {
+            statusline = true,
+          },
+        },
+        setup_colors = function()
+          local astroui = require "astroui"
+          local status_opts = astroui.config.status
+          local color = assert(status_opts.fallback_colors)
+          local get_hlgroup = astroui.get_hlgroup
+          local lualine_mode = require("astroui.status.hl").lualine_mode
+          local function resolve_lualine(orig, ...) return (not orig or orig == "NONE") and lualine_mode(...) or orig end
+
+          local StatusLine = get_hlgroup("StatusLine", { fg = color.fg, bg = color.dark_bg })
+          local WinBar = get_hlgroup("WinBar", { fg = color.bright_grey, bg = color.bg })
+          local WinBarNC = get_hlgroup("WinBarNC", { fg = color.grey, bg = color.bg })
+          local Conditional = get_hlgroup("Conditional", { fg = color.bright_purple, bg = color.dark_bg })
+          local String = get_hlgroup("String", { fg = color.green, bg = color.dark_bg })
+          local TypeDef = get_hlgroup("TypeDef", { fg = color.yellow, bg = color.dark_bg })
+          local GitSignsAdd = get_hlgroup("GitSignsAdd", { fg = color.green, bg = color.dark_bg })
+          local GitSignsChange = get_hlgroup("GitSignsChange", { fg = color.orange, bg = color.dark_bg })
+          local GitSignsDelete = get_hlgroup("GitSignsDelete", { fg = color.bright_red, bg = color.dark_bg })
+          local DiagnosticError = get_hlgroup("DiagnosticError", { fg = color.bright_red, bg = color.dark_bg })
+          local DiagnosticWarn = get_hlgroup("DiagnosticWarn", { fg = color.orange, bg = color.dark_bg })
+          local DiagnosticInfo = get_hlgroup("DiagnosticInfo", { fg = color.white, bg = color.dark_bg })
+          local DiagnosticHint = get_hlgroup("DiagnosticHint", { fg = color.bright_yellow, bg = color.dark_bg })
+          local HeirlineInactive =
+              resolve_lualine(get_hlgroup("HeirlineInactive", { bg = nil }).bg, "inactive", color.dark_grey)
+          local HeirlineNormal = resolve_lualine(get_hlgroup("HeirlineNormal", { bg = nil }).bg, "normal", color.blue)
+          local HeirlineInsert = resolve_lualine(get_hlgroup("HeirlineInsert", { bg = nil }).bg, "insert", color.green)
+          local HeirlineVisual = resolve_lualine(get_hlgroup("HeirlineVisual", { bg = nil }).bg, "visual", color.purple)
+          local HeirlineReplace =
+              resolve_lualine(get_hlgroup("HeirlineReplace", { bg = nil }).bg, "replace", color.bright_red)
+          local HeirlineCommand =
+              resolve_lualine(get_hlgroup("HeirlineCommand", { bg = nil }).bg, "command", color.bright_yellow)
+          local HeirlineTerminal =
+              resolve_lualine(get_hlgroup("HeirlineTerminal", { bg = nil }).bg, "insert", HeirlineInsert)
+
+          local colors = {
+            fg = StatusLine.fg,
+            bg = StatusLine.bg,
+            section_fg = StatusLine.fg,
+            section_bg = StatusLine.bg,
+            git_branch_fg = Conditional.fg,
+            mode_fg = StatusLine.bg,
+            treesitter_fg = String.fg,
+            scrollbar = TypeDef.fg,
+            git_added = GitSignsAdd.fg,
+            git_changed = GitSignsChange.fg,
+            git_removed = GitSignsDelete.fg,
+            diag_ERROR = DiagnosticError.fg,
+            diag_WARN = DiagnosticWarn.fg,
+            diag_INFO = DiagnosticInfo.fg,
+            diag_HINT = DiagnosticHint.fg,
+            winbar_fg = WinBar.fg,
+            winbar_bg = WinBar.bg,
+            winbarnc_fg = WinBarNC.fg,
+            winbarnc_bg = WinBarNC.bg,
+            inactive = HeirlineInactive,
+            normal = HeirlineNormal,
+            insert = HeirlineInsert,
+            visual = HeirlineVisual,
+            replace = HeirlineReplace,
+            command = HeirlineCommand,
+            terminal = HeirlineTerminal,
+          }
+
+          for _, section in ipairs {
+            "git_branch",
+            "file_info",
+            "git_diff",
+            "diagnostics",
+            "lsp",
+            "macro_recording",
+            "mode",
+            "cmd_info",
+            "treesitter",
+            "nav",
+            "virtual_env",
+          } do
+            if not colors[section .. "_bg"] then colors[section .. "_bg"] = colors["section_bg"] end
+            if not colors[section .. "_fg"] then colors[section .. "_fg"] = colors["section_fg"] end
+          end
+
+          return colors
+        end,
+      }
+    end,
+  },
+  {
     "rebelot/heirline.nvim",
-    event = "VimEnter",
+    event = "BufEnter",
+    dependencies = {
+      "AstroNvim/astrocore"
+    },
     opts = function()
-      local status = require "lvim.core.heirline.utils.status"
+      local status = require "astroui.status"
       return {
-        {
+        opts = {
+          colors = require("astroui").config.status.setup_colors(),
           disable_winbar_cb = function(args)
-            return not require("lvim.core.heirline.utils.buffer").is_valid(args.buf)
-                or status.condition.buffer_matches({
-                  buftype = { "terminal", "prompt", "nofile", "help", "quickfix" },
-                  filetype = { "NvimTree", "neo%-tree", "dashboard", "Outline", "aerial" },
-                }, args.buf)
+            return not require("astrocore.buffer").is_valid(args.buf)
+                or status.condition.buffer_matches({ buftype = { "terminal", "nofile" } }, args.buf)
           end,
         },
-        statusline = {
-          -- statusline
+        statusline = { -- statusline
           hl = { fg = "fg", bg = "bg" },
           status.component.mode(),
           status.component.git_branch(),
-          status.component.file_info { filetype = {}, filename = false, file_modified = false },
+          status.component.file_info(),
           status.component.git_diff(),
           status.component.diagnostics(),
           status.component.fill(),
           status.component.cmd_info(),
           status.component.fill(),
           status.component.lsp(),
+          status.component.virtual_env(),
           status.component.treesitter(),
           status.component.nav(),
           status.component.mode { surround = { separator = "right" } },
         },
-        -- winbar = {
-        --   -- winbar
-        --   init = function(self) self.bufnr = vim.api.nvim_get_current_buf() end,
-        --   fallthrough = false,
-        --   {
-        --     condition = function() return not status.condition.is_active() end,
-        --     -- status.component.separated_path(),
-        --     status.component.file_info {
-        --       file_icon = { hl = status.hl.file_icon "winbar", padding = { left = 0 } },
-        --       file_modified = false,
-        --       file_read_only = false,
-        --       hl = status.hl.get_attributes("winbarnc", true),
-        --       surround = false,
-        --       update = "BufEnter",
-        --     },
-        --   },
-        --   status.component.breadcrumbs { hl = status.hl.get_attributes("winbar", true) },
-        -- },
-        -- tabline = { -- bufferline
-        --   {
-        --     -- file tree padding
-        --     condition = function(self)
-        --       self.winid = vim.api.nvim_tabpage_list_wins(0)[1]
-        --       return status.condition.buffer_matches(
-        --         { filetype = { "aerial", "dapui_.", "neo%-tree", "NvimTree" } },
-        --         vim.api.nvim_win_get_buf(self.winid)
-        --       )
-        --     end,
-        --     provider = function(self) return string.rep(" ", vim.api.nvim_win_get_width(self.winid) + 1) end,
-        --     hl = { bg = "tabline_bg" },
-        --   },
-        --   status.heirline.make_buflist(status.component.tabline_file_info()), -- component for each buffer tab
-        --   status.component.fill { hl = { bg = "tabline_bg" } },               -- fill the rest of the tabline with background color
-        --   {
-        --     -- tab list
-        --     condition = function() return #vim.api.nvim_list_tabpages() >= 2 end, -- only show tabs if there are more than one
-        --     status.heirline.make_tablist {                                        -- component for each tab
-        --       provider = status.provider.tabnr(),
-        --       hl = function(self) return status.hl.get_attributes(status.heirline.tab_type(self, "tab"), true) end,
-        --     },
-        --     {
-        --       -- close button for current tab
-        --       provider = status.provider.close_button { kind = "TabClose", padding = { left = 1, right = 1 } },
-        --       hl = status.hl.get_attributes("tab_close", true),
-        --       on_click = {
-        --         callback = function() require("lvim.core.heirline.utils.buffer").close_tab() end,
-        --         name = "heirline_tabline_close_tab_callback",
-        --       },
-        --     },
-        --   },
-        -- },
-        statuscolumn = vim.fn.has "nvim-0.9" == 1 and {
-          status.component.foldcolumn(),
-          status.component.fill(),
-          status.component.numbercolumn(),
-          status.component.signcolumn(),
-        } or nil,
+
       }
     end,
-    config = require "lvim.core.heirline",
+    config = function(...) require "lvim.core.heirline" (...) end,
   },
 
   -- {
@@ -354,8 +530,8 @@ local core_plugins = {
     config = function()
       require("lvim.core.breadcrumbs").setup()
     end,
+    enabled = true,
     event = "User FileOpened",
-    enabled = lvim.builtin.breadcrumbs.active,
     -- enabled = false,
   },
 
@@ -364,9 +540,9 @@ local core_plugins = {
     config = function()
       require("lvim.core.bufferline").setup()
     end,
+    enabled = true,
     branch = "main",
     event = "User FileOpened",
-    enabled = true,
   },
 
   -- Debugging
@@ -603,7 +779,7 @@ local core_plugins = {
   -- makes some plugins dot-repeatable like leap
   { "tpope/vim-repeat",     event = "VeryLazy" },
   -- ui components
-  { "MunifTanjim/nui.nvim", lazy = true },
+  { "MunifTanjim/nui.nvim", lazy = true,       enabled = false },
   -- scroll bar customizable
   {
     "petertriho/nvim-scrollbar",
@@ -652,6 +828,7 @@ local core_plugins = {
   -- Better `vim.notify()`
   {
     "rcarriga/nvim-notify",
+    enabled = false,
     keys = {
       {
         "<leader>un",
@@ -793,14 +970,14 @@ local core_plugins = {
     end,
   },
   -- better diagnosticslist and others
-  -- {
-  --   "folke/trouble.nvim",
-  --   name = "trouble",
-  --   cmd = { "TroubleToggle", "Trouble" },
-  --   event = "BufReadPost",
-  --   opts = { use_diagnostic_signs = true },
-  --   disable = true
-  -- },
+  {
+    "folke/trouble.nvim",
+    name = "trouble",
+    cmd = { "TroubleToggle", "Trouble" },
+    event = "BufReadPost",
+    opts = { use_diagnostic_signs = true },
+    enabled = true
+  },
   {
     "folke/todo-comments.nvim",
     name = "todo-comments",
