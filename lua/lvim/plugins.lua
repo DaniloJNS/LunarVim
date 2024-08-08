@@ -1067,6 +1067,12 @@ local core_plugins = {
       end)
       require('leap').add_default_mappings()
     end
+  {
+    "potamides/pantran.nvim",
+    event = "BufReadPost",
+    config = require('lvim.core.pantran').setup
+  },
+  {
   }
 }
 
