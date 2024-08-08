@@ -1073,6 +1073,11 @@ local core_plugins = {
     config = require('lvim.core.pantran').setup
   },
   {
+    'stevearc/oil.nvim',
+    -- Optional dependencies
+    dependencies = { "nvim-tree/nvim-web-devicons" },
+    config = require("lvim.core.oil").setup()
+  },
   }
 }
 
