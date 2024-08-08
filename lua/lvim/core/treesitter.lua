@@ -41,8 +41,8 @@ function M.config()
     auto_install = true,
 
     matchup = {
-      enable = false, -- mandatory, false will disable the whole extension
-      disable = {},   -- optional, list of language that will be disabled
+      enable = true,             -- mandatory, false will disable the whole extension
+      disable = { "javascript" }, -- optional, list of language that will be disabled
     },
     highlight = {
       enable = true, -- false will disable the whole extension
@@ -171,7 +171,7 @@ function M.config()
     playground = {
       enable = false,
       disable = {},
-      updatetime = 25, -- Debounced time for highlighting nodes in the playground from source code
+      updatetime = 25,         -- Debounced time for highlighting nodes in the playground from source code
       persist_queries = false, -- Whether the query persists across vim sessions
       keybindings = {
         toggle_query_editor = "o",
