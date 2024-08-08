@@ -164,6 +164,7 @@ local core_plugins = {
   },
   {
     "andymass/vim-matchup",
+    disabled = true,
     event = "BufReadPost",
     setup = function()
       vim.g.matchup_matchparen_offscreen = { method = "popup" }
@@ -567,7 +568,7 @@ local core_plugins = {
       require("lvim.core.dap").setup()
     end,
     lazy = true,
-    enabled = lvim.builtin.dap.active,
+    enabled = false,
   },
 
   -- debugger based in DAP for Golang
@@ -580,7 +581,7 @@ local core_plugins = {
     end,
     lazy = true,
     event = "User FileOpened",
-    enabled = lvim.builtin.dap.active,
+    enabled = false,
   },
 
   -- Debugger user interface
@@ -591,7 +592,7 @@ local core_plugins = {
       require("lvim.core.dap").setup_ui()
     end,
     lazy = true,
-    enabled = lvim.builtin.dap.active,
+    enabled = false,
   },
 
   -- alpha
@@ -647,7 +648,7 @@ local core_plugins = {
       require("lvim.core.indentlines").setup()
     end,
     event = "User FileOpened",
-    enabled = lvim.builtin.indentlines.active,
+    enabled = false,
   },
 
   {
@@ -677,7 +678,6 @@ local core_plugins = {
   },
   {
     "ojroques/nvim-bufdel",
-    name = 'nvim-bufdel',
     event = "BufReadPre",
     config = function()
       require('bufdel').setup {
@@ -757,6 +757,7 @@ local core_plugins = {
   {
     "vimwiki/vimwiki",
     cmd = "VimwikiIndex",
+    enabled = false,
     config = function()
       vim.g.vimwiki_list = { {
         path = "~/vimwiki",
@@ -801,6 +802,7 @@ local core_plugins = {
     config = function()
       require('lvim.core.nvim-scrollbar')
     end,
+    enabled = false,
     event = "VeryLazy",
   },
   {
@@ -880,20 +882,6 @@ local core_plugins = {
         return vim.ui.input(...)
       end
     end,
-  },
-  {
-    "lewis6991/gitsigns.nvim",
-    event = "BufReadPre",
-    opts = {
-      signs = {
-        add = { text = "▎" },
-        change = { text = "▎" },
-        delete = { text = "契" },
-        topdelete = { text = "契" },
-        changedelete = { text = "▎" },
-        untracked = { text = "▎" },
-      },
-    },
   },
   {
     "sindrets/diffview.nvim",
@@ -998,9 +986,9 @@ local core_plugins = {
     name = "todo-comments",
     cmd = { "TodoTrouble", "TodoTelescope" },
     dependencies = {
-      "nvim-lua/plenary.nvim",
-      "folke/trouble.nvim",
+      "nvim-lua/plenary.nvim"
     },
+    want = { "folke/trouble.nvim" },
     event = "BufReadPost",
     config = true,
   },
@@ -1063,8 +1051,6 @@ local core_plugins = {
     "kylechui/nvim-surround",
     event = "InsertEnter",
     want = "nvim-treesitter/nvim-treesitter-textobjects",
-    dependencies = {
-    },
     config = true
   },
   {
