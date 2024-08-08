@@ -1067,6 +1067,7 @@ local core_plugins = {
       end)
       require('leap').add_default_mappings()
     end
+  },
   {
     "potamides/pantran.nvim",
     event = "BufReadPost",
@@ -1094,6 +1095,11 @@ local core_plugins = {
     "tiagovla/scope.nvim",
     config = true
   },
+  {
+    "ThePrimeagen/harpoon",
+    branch = "harpoon2",
+    dependencies = { "nvim-lua/plenary.nvim" },
+    config = require("lvim.core.harpoon").setup
   }
 }
 
