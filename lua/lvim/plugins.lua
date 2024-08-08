@@ -55,13 +55,17 @@ local core_plugins = {
   {
     "nvim-telescope/telescope.nvim",
     name = "telescope",
-    config = function()
-      require("lvim.core.telescope").setup()
-    end,
+    config = function() require("lvim.core.telescope").setup() end,
     want = "nvim-telescope/telescope-fzf-native.nvim",
     dependencies = {
       "nvim-telescope/telescope-ui-select.nvim",
       "nvim-telescope/telescope-arecibo.nvim",
+      {
+        "nvim-telescope/telescope-live-grep-args.nvim",
+        -- This will not install any breaking changes.
+        -- For major updates, this must be adjusted manually.
+        version = "^1.0.0",
+      },
       -- {
       --   "nvim-telescope/telescope-frecency.nvim",
       --   dependencies = {
