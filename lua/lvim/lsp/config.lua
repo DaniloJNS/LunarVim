@@ -53,6 +53,7 @@ local skipped_servers = {
   "rubocop",
   "ruby_ls",
   "ruby_lsp",
+  -- "solargraph",
   "ruff_lsp",
   "scry",
   "snyk_ls",
@@ -89,6 +90,8 @@ local skipped_filetypes = { "markdown", "rst", "plaintext", "toml", "proto" }
 local join_paths = require("lvim.utils").join_paths
 
 return {
+  -- Directory containing LSP Server autoload based on file type
+  -- https://neovim.io/doc/user/usr_43.html#filetype-plugin
   templates_dir = join_paths(get_runtime_dir(), "site", "after", "ftplugin"),
   diagnostics = {
     signs = {
@@ -180,7 +183,7 @@ return {
   },
   nlsp_settings = {
     setup = {
-      config_home = join_paths(get_config_dir(), "lsp-settings"),
+      config_home = join_paths(vim.env.LUNARVIM_BASE_DIR, "lua", "lvim", "lsp", "nlsp_settings"),
       -- set to false to overwrite schemastore.nvim
       append_default_schemas = true,
       ignored_servers = {},
@@ -190,6 +193,10 @@ return {
   null_ls = {
     setup = {
       debug = false,
+      sources = {
+        require("null-ls").builtins.diagnostics.fish,
+        require("null-ls").builtins.diagnostics.reek,
+      },
     },
     config = {},
   },

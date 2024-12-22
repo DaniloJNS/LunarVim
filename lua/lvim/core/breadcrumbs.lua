@@ -1,6 +1,7 @@
 local M = {}
 
 -- local Log = require "lvim.core.log"
+
 local icons = lvim.icons.kind
 
 M.config = function()
@@ -63,6 +64,42 @@ M.config = function()
         Operator = ' ',
         TypeParameter = ' '
       },
+      -- icons = {
+      -- Array = icons.Array .. " ",
+      -- Boolean = icons.Boolean,
+      -- Class = icons.Class .. " ",
+      -- Color = icons.Color .. " ",
+      -- Constant = icons.Constant .. " ",
+      -- Constructor = icons.Constructor .. " ",
+      -- Enum = icons.Enum .. " ",
+      -- EnumMember = icons.EnumMember .. " ",
+      -- Event = icons.Event .. " ",
+      -- Field = icons.Field .. " ",
+      -- File = icons.File .. " ",
+      -- Folder = icons.Folder .. " ",
+      -- Function = icons.Function .. " ",
+      -- Interface = icons.Interface .. " ",
+      -- Key = icons.Key .. " ",
+      -- Keyword = icons.Keyword .. " ",
+      -- Method = icons.Method .. " ",
+      -- Module = icons.Module .. " ",
+      -- Namespace = icons.Namespace .. " ",
+      -- Null = icons.Null .. " ",
+      -- Number = icons.Number .. " ",
+      -- Object = icons.Object .. " ",
+      -- Operator = icons.Operator .. " ",
+      -- Package = icons.Package .. " ",
+      -- Property = icons.Property .. " ",
+      -- Reference = icons.Reference .. " ",
+      -- Snippet = icons.Snippet .. " ",
+      -- String = icons.String .. " ",
+      -- Struct = icons.Struct .. " ",
+      -- Text = icons.Text .. " ",
+      -- TypeParameter = icons.TypeParameter .. " ",
+      -- Unit = icons.Unit .. " ",
+      -- Value = icons.Value .. " ",
+      -- Variable = icons.Variable .. " ",
+      -- },
       highlight = true,
       separator = " " .. lvim.icons.ui.ChevronRight .. " ",
       depth_limit = 0,
@@ -166,30 +203,19 @@ M.get_winbar = function()
   if excludes() then
     return
   end
-  local value = M.get_filename()
-
-  local gps_added = false
-  if not isempty(value) then
-    local gps_value = get_gps()
-    value = value .. " " .. gps_value
-    if not isempty(gps_value) then
-      gps_added = true
-    end
-  end
+  local value = get_gps()
 
   if not isempty(value) and vim.api.nvim_get_option_value("mod", { buf = 0 }) then
     -- TODO: replace with circle
     local mod = "%#LspCodeLens#" .. lvim.icons.ui.Circle .. "%*"
-    if gps_added then
-      value = value .. " " .. mod
-    else
-      value = value .. mod
-    end
+    value = value .. " " .. mod
   end
 
   local num_tabs = #vim.api.nvim_list_tabpages()
+  -- Only show tab indicator when current bufferline is disabled for tab
+  local bufferline_tab_view_enabled = lvim.builtin.bufferline.options.show_tab_indicators
 
-  if num_tabs > 1 and not isempty(value) then
+  if num_tabs > 1 and not isempty(value) and not bufferline_tab_view_enabled then
     local tabpage_number = tostring(vim.api.nvim_tabpage_get_number(0))
     value = value .. "%=" .. tabpage_number .. "/" .. tostring(num_tabs)
   end

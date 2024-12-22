@@ -170,8 +170,26 @@ function M.load_defaults()
           vim.lsp.buf.code_action({ context = { only = { 'source.organizeImports' } }, apply = true })
         end
       }
+    },
+    {
+      "BufWritePre",
+      {
+        pattern = { "*.norg" },
+        group = "_filetype_settings",
+        callback = function()
+          vim.lsp.buf.code_action({ context = { only = { 'source.organizeImports' } }, apply = true })
+        end
+      }
     }
   }
+
+  -- Allows save buffers mapped to a non-existent directory
+  vim.cmd([[
+    augroup Mkdir
+      autocmd!
+      autocmd BufWritePre * call mkdir(expand("<afile>:p:h"), "p")
+    augroup END
+  ]])
 
   M.define_autocmds(definitions)
 end

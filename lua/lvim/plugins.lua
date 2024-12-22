@@ -20,7 +20,10 @@ local core_plugins = {
     event = "User FileOpened",
     dependencies = "mason.nvim",
   },
+  -- A plugin for setting Neovim LSP with JSON or YAML files
   { "tamago324/nlsp-settings.nvim", cmd = "LspSettings", lazy = true },
+  -- Use Neovim as a language server to inject LSP diagnostics, code actions, and more via Lua.
+  -- Basically, more options for use LSP
   { "nvimtools/none-ls.nvim",       lazy = true },
   {
     "williamboman/mason.nvim",
@@ -567,6 +570,9 @@ local core_plugins = {
     config = function()
       require("lvim.core.dap").setup()
     end,
+    dependencies = {
+      "0000marcell/nvim-dap-ruby",
+    },
     lazy = true,
     enabled = false,
   },

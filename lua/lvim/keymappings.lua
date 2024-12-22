@@ -32,7 +32,7 @@ if utils.has_plugin("neo-tree.nvim") then
   --   end,
   --   desc = "Explore NoTree(root dir)",
   mappings.n["<leader>e"] = { "<leader>fe", desc = "Explorer NeoTree (root dir)", remap = true }
-  mappings.n["<C-o>"] = { "<leader>fe", desc = "Explorer NeoTree (root dir)", remap = true }
+  mappings.n["<C-p>"] = { "<leader>fe", desc = "Explorer NeoTree (root dir)", remap = true }
   mappings.n["<leader>E"] = { "<leader>fE", desc = "Explorer NeoTree (cwd)", remap = true }
   -- }
 end
@@ -54,7 +54,6 @@ mappings.i["<A-m>"] = { "<Esc>:m .-2<cr>==gi", desc = "Move up" }
 mappings.n["gw"] = { "*N" }
 mappings.n["<A-n>"] = { ":m .+1<CR>==", desc = "Move down" }
 mappings.v["<A-m>"] = { ":m '<-2<CR>gv=gv", desc = "Move up" }
-mappings.x["gw"] = { "*N" }
 
 -- https://github.com/mhinz/vim-galore#saner-behavior-of-n-and-n
 mappings.n["n"] = { "'Nn'[v:searchforward]", expr = true, desc = "Next search result" }
@@ -142,7 +141,7 @@ if utils.has_plugin("bufferline.nvim") then
 else
   mappings.n["<S-h>"] = { "<cmd>bprevious<cr>", desc = "Prev buffer" }
   mappings.n["<S-l>"] = { "<cmd>bnext<cr>", desc = "Next buffer" }
-  mappings.n["<TAB>"] = { "<cmd>BufferLineCycleNext<cr>", desc = "Next buffer" }
+  mappings.n["<TAB>"] = { "<cmd>bnext<cr>", desc = "Next buffer" }
   mappings.n["[b"] = { "<cmd>bprevious<cr>", desc = "Prev buffer" }
   mappings.n["]b"] = { "<cmd>bnext<cr>", desc = "Next buffer" }
 end
@@ -225,7 +224,7 @@ if utils.has_plugin("telescope") then
   mappings.n["<leader>sc"] = { "<cmd>Telescope command_history<cr>", desc = "Command History" }
   mappings.n["<leader>sC"] = { "<cmd>Telescope commands<cr>", desc = "Commands" }
   mappings.n["<leader>sd"] = { "<cmd>Telescope diagnostics<cr>", desc = "Diagnostics" }
-  mappings.n["<leader>sf"] = { "<cmd>Telescope frecency workspace=CWD<cr>", desc = "Command History" }
+  mappings.n["<leader>sf"] = { require("telescope").extensions.live_grep_args.live_grep_args, desc = "Grep with args" }
   mappings.n["<leader>sg"] = { telescope("live_grep"), desc = "Grep (root dir)" }
   mappings.n["<leader>sG"] = { telescope("live_grep", { cwd = false }), desc = "Grep (cwd)" }
   mappings.n["<leader>sh"] = { "<cmd>Telescope help_tags<cr>", desc = "Help Pages" }
@@ -261,8 +260,20 @@ end
 
 -- LSP {{
 if utils.has_plugin("trouble") then
-  mappings.n["<leader>xx"] = { "<cmd>TroubleToggle document_diagnostics<cr>", desc = "Document Diagnostics (Trouble)" }
-  mappings.n["<leader>xX"] = { "<cmd>TroubleToggle workspace_diagnostics<cr>", desc = "Workspace Diagnostics (Trouble)" }
+  mappings.n["<leader>xx"] = {
+    "<cmd>Trouble diagnostics toggle filter.buf=0<cr>",
+    desc =
+    "Document Diagnostics (Trouble)"
+  }
+  mappings.n["<leader>xX"] = { "<cmd>Trouble diagnostics toggle<cr>", desc = "Workspace Diagnostics (Trouble)" }
+  mappings.n["<leader>cs"] = { "<cmd>Trouble symbols toggle focus=false<cr>", desc = "Symbols (Trouble)" }
+  mappings.n["<leader>cl"] = {
+    "<cmd>Trouble lsp toggle focus=false win.position=right<cr>",
+    desc =
+    "LSP Definitions / references / ... (Trouble)"
+  }
+  mappings.n["<leader>xL"] = { "<cmd>Trouble loclist toggle<cr>", desc = "Location List (Trouble)" }
+  mappings.n["<leader>xQ"] = { "<cmd>Trouble qflist toggle<cr>", desc = "Quickfix List (Trouble)" }
 end
 
 if utils.has_plugin("navigator") then
@@ -457,6 +468,34 @@ if utils.has_plugin('neotest') then
     desc = "Open in line output test"
   }
 end
+
+if utils.has_plugin('oil.nvim') then
+  mappings.n["-"] = { "<cmd>Oil<CR>", desc = "Open oil in current directory" }
+  -- mappings.n["_"] = { require("oil.nvim").toogle_float, desc = "Open oil in current directory by float window" }
+end
+
+-- if utils.has_plugin("pantran.nvim") then
+--   mappings.n["<leader>tr"] = { "<cmd> lua require('pantran').motion_translate()<cr>", desc = "open translator" }
+--   mappings.n["<leader>trr"] = {
+--     "<cmd> lua require('pantran').motion_translate() .. '_'<cr>",
+--     desc = 'select words to translate',
+--     noremap = true,
+--     silent = true,
+--     expr = true
+--   }
+--   mappings.x["<leader>tr"] = {
+--     "<cmd> lua require('pantran.nvim').motion_translate()<cr>",
+--     desc = "open translator",
+--     noremap = true,
+--     silent = true,
+--     expr = true
+--   }
+-- end
+local pantran = require('pantran')
+local opts = { noremap = true, silent = true, expr = true }
+vim.keymap.set("n", "<leader>tr", pantran.motion_translate, opts)
+vim.keymap.set("n", "<leader>trr", function() return pantran.motion_translate() .. "_" end, opts)
+vim.keymap.set("x", "<leader>tr", pantran.motion_translate, opts)
 -- }}
 -- {{ testing
 -- if utils.has_plugin('mind') then
@@ -471,6 +510,21 @@ mappings.n["<leader>mna"] = { "<cmd> lua require('mind').commands.add_above()<cr
 if vim.fn.has("nvim-0.9.0") == 1 then
   mappings.n["<leader>ui"] = { vim.show_pos, desc = "Inspect Pos" }
 end
+
+local harpoon = require("harpoon")
+local buffer_jump_list = "buffer_jump"
+
+vim.keymap.set("n", "<C-x>", function() harpoon:list(buffer_jump_list):add() end)
+vim.keymap.set("n", "<C-e>", function() harpoon.ui:toggle_quick_menu(harpoon:list(buffer_jump_list)) end)
+
+vim.keymap.set("n", "<leader>1", function() harpoon:list(buffer_jump_list):select(1) end)
+vim.keymap.set("n", "<leader>2", function() harpoon:list(buffer_jump_list):select(2) end)
+vim.keymap.set("n", "<leader>3", function() harpoon:list(buffer_jump_list):select(3) end)
+vim.keymap.set("n", "<leader>4", function() harpoon:list(buffer_jump_list):select(4) end)
+
+-- Toggle previous & next buffers stored within Harpoon list
+vim.keymap.set("n", "<C-S-P>", function() harpoon:list(buffer_jump_list):prev() end)
+vim.keymap.set("n", "<C-S-N>", function() harpoon:list(buffer_jump_list):next() end)
 
 local function map(mode, lhs, rhs, opts)
   -- local keys = require("lazy.core.handler").handlers.keys

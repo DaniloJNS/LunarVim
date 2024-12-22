@@ -96,7 +96,7 @@
     "commit": "c15de7e"
   },
   "nvim-bufdel": {
-    "commit": "96c4f7a"
+    "commit": "523d58e"
   },
   "nvim-cmp": {
     "commit": "5260e5e"
@@ -201,7 +201,7 @@
     "commit": "5eeb795"
   },
   "vim-matchup": {
-    "commit": "269f9be"
+    "commit": "1535a76"
   },
   "vim-pasta": {
     "commit": "2b78670"

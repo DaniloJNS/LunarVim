@@ -1,0 +1,14 @@
+{
+  "solargraph.diagnostics": true,
+  "solargraph.autoformat": false,
+  "solargraph.commandPath": "solargraph",
+  "solargraph.completion": true,
+  "solargraph.definitions": true,
+  "solargraph.folding": true,
+  "solargraph.formatting": true,
+  "solargraph.hover": true,
+  "solargraph.logLevel": "warn",
+  "solargraph.references": true,
+  "solargraph.rename": true,
+  "solargraph.symbols": true,
+}

@@ -64,17 +64,17 @@ M.config = function()
       auto_toggle_bufferline = true,
       move_wraps_at_ends = false,
       groups = { items = {}, options = { toggle_hidden_on_enter = true } },
-      mode = "buffers", -- set to "tabs" to only show tabpages instead
-      numbers = "none", -- can be "none" | "ordinal" | "buffer_id" | "both" | function
+      mode = "buffers",               -- set to "tabs" to only show tabpages instead
+      numbers = "none",               -- can be "none" | "ordinal" | "buffer_id" | "both" | function
       close_command = function(bufnr) -- can be a string | function, see "Mouse actions"
         M.buf_kill("bd", bufnr, false)
       end,
       right_mouse_command = "vert sbuffer %d", -- can be a string | function, see "Mouse actions"
-      left_mouse_command = "buffer %d", -- can be a string | function, see "Mouse actions"
-      middle_mouse_command = nil, -- can be a string | function, see "Mouse actions"
+      left_mouse_command = "buffer %d",        -- can be a string | function, see "Mouse actions"
+      middle_mouse_command = nil,              -- can be a string | function, see "Mouse actions"
       indicator = {
-        icon = lvim.icons.ui.BoldLineLeft, -- this should be omitted if indicator style is not 'icon'
-        style = "icon", -- can also be 'underline'|'none',
+        icon = lvim.icons.ui.BoldLineLeft,     -- this should be omitted if indicator style is not 'icon'
+        style = "icon",                        -- can also be 'underline'|'none',
       },
       buffer_close_icon = lvim.icons.ui.Close,
       modified_icon = lvim.icons.ui.Circle,
@@ -93,7 +93,7 @@ M.config = function()
       end,
       max_name_length = 18,
       max_prefix_length = 15, -- prefix used when a buffer is de-duplicated
-      truncate_names = true, -- whether or not tab names should be truncated
+      truncate_names = true,  -- whether or not tab names should be truncated
       tab_size = 18,
       diagnostics = "nvim_lsp",
       diagnostics_update_in_insert = false,
@@ -168,7 +168,7 @@ M.config = function()
       -- [focused and unfocused]. eg: { '|', '|' }
       separator_style = "thin",
       enforce_regular_tabs = false,
-      always_show_bufferline = false,
+      always_show_bufferline = true,
       hover = {
         enabled = true, -- requires nvim 0.8+
         delay = 200,
@@ -232,7 +232,8 @@ function M.buf_kill(kill_command, bufnr, force)
         end)
       elseif choice == 2 then
         force = true
-      else return
+      else
+        return
       end
     elseif api.nvim_get_option_value("buftype", { buf = 0 }) == "terminal" then
       choice = fn.confirm(fmt([[Close "%s"?]], bufname), "&Yes\n&No\n&Cancel")
